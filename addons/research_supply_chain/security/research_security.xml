@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_research_supply_chain" model="ir.module.category">
+        <field name="name">Research Supply Chain</field>
+        <field name="description">Manage research projects, resources, requirements, experiments, and outputs.</field>
+        <field name="sequence">15</field>
+    </record>
+
+    <record id="group_research_user" model="res.groups">
+        <field name="name">Research Supply Chain / User</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_research_manager" model="res.groups">
+        <field name="name">Research Supply Chain / Manager</field>
+        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+    </record>
+
+    <record id="base.group_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+    </record>
+</odoo>

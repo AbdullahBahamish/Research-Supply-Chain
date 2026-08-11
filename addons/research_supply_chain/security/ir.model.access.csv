@@ -1,3 +1,11 @@
-id,name,model_id:id,group_id,perm_read,perm_write,perm_create,perm_unlink
-access_research_paper,research.paper,model_research_paper,,1,1,1,1
-access_research_project,research.project,model_research_project,,1,1,1,1
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_research_researcher_user,research.researcher.user,model_research_researcher,base.group_user,1,1,1,1
+access_research_project_researcher_user,research.project.researcher.user,model_research_project_researcher,base.group_user,1,1,1,1
+access_research_project_user,research.project.user,model_research_project,base.group_user,1,1,1,1
+access_project_budget_user,project.budget.user,model_project_budget,base.group_user,1,1,1,1
+access_research_requirement_user,research.requirement.user,model_research_requirement,base.group_user,1,1,1,1
+access_research_resource_user,research.resource.user,model_research_resource,base.group_user,1,1,1,1
+access_research_experiment_user,research.experiment.user,model_research_experiment,base.group_user,1,1,1,1
+access_research_experiment_resource_user,research.experiment.resource.user,model_research_experiment_resource,base.group_user,1,1,1,1
+access_research_output_user,research.output.user,model_research_output,base.group_user,1,1,1,1
+access_research_paper_user,research.paper.user,model_research_paper,base.group_user,1,1,1,1

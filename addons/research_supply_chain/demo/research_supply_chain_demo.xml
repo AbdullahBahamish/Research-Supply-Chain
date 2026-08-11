@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Researcher Demo Data -->
+    <record id="demo_researcher_1" model="research.researcher">
+        <field name="user_id" ref="base.user_admin"/>
+        <field name="position">Principal Investigator</field>
+        <field name="expertise">Artificial Intelligence, Operations Research</field>
+        <field name="is_principal">True</field>
+    </record>
+
+    <record id="demo_researcher_2" model="research.researcher">
+        <field name="user_id" ref="base.user_demo"/>
+        <field name="position">Postdoctoral Researcher</field>
+        <field name="expertise">Data Engineering, Machine Learning</field>
+        <field name="is_principal">False</field>
+    </record>
+
+    <!-- Project Demo Data -->
+    <record id="demo_project_1" model="research.project">
+        <field name="project_name">AI-Driven Supply Chain Optimization</field>
+        <field name="project_description">Developing machine learning algorithms to optimize resource allocation in research networks.</field>
+        <field name="lead_researcher_id" ref="demo_researcher_1"/>
+        <field name="start_date">2026-01-01</field>
+        <field name="end_date">2026-12-31</field>
+        <field name="project_status">in_progress</field>
+    </record>
+
+    <!-- Project Researcher Team Allocation -->
+    <record id="demo_project_researcher_1" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="researcher_id" ref="demo_researcher_1"/>
+        <field name="role">Lead Investigator</field>
+        <field name="allocated_pct">50.0</field>
+        <field name="join_date">2026-01-01</field>
+    </record>
+
+    <record id="demo_project_researcher_2" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="researcher_id" ref="demo_researcher_2"/>
+        <field name="role">Primary Researcher</field>
+        <field name="allocated_pct">100.0</field>
+        <field name="join_date">2026-01-15</field>
+    </record>
+
+    <!-- Project Budget Demo Data -->
+    <record id="demo_budget_1" model="project.budget">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="total_amount">100000.00</field>
+        <field name="spent_amount">25000.00</field>
+        <field name="start_date">2026-01-01</field>
+        <field name="end_date">2026-12-31</field>
+    </record>
+
+    <!-- Requirement Demo Data -->
+    <record id="demo_requirement_1" model="research.requirement">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="name">High-Performance Compute Cluster Access</field>
+        <field name="category">hardware</field>
+        <field name="description">Requires 8x NVIDIA H100 GPUs for deep learning model training.</field>
+        <field name="quantity">8.0</field>
+        <field name="priority">high</field>
+        <field name="status">approved</field>
+        <field name="requested_date">2026-01-10</field>
+        <field name="needed_by">2026-02-01</field>
+    </record>
+
+    <!-- Resource Demo Data -->
+    <record id="demo_resource_1" model="research.resource">
+        <field name="name">NVIDIA H100 GPU Server Cluster</field>
+        <field name="resource_type">equipment</field>
+        <field name="description">On-premise high performance computing nodes.</field>
+        <field name="specification">8x H100 80GB PCIe, Dual AMD EPYC 9654, 1.5TB RAM</field>
+        <field name="availability_status">in_use</field>
+        <field name="owner_project_id" ref="demo_project_1"/>
+    </record>
+
+    <!-- Experiment Demo Data -->
+    <record id="demo_experiment_1" model="research.experiment">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="name">Supply Chain Transformer Fine-Tuning Benchmark</field>
+        <field name="objective">Benchmark transformer model convergence speed on supply chain routing dataset.</field>
+        <field name="methodology">Run 5-fold cross-validation across 100 epochs using AdamW optimizer.</field>
+        <field name="status">running</field>
+        <field name="start_date">2026-02-01</field>
+        <field name="created_by" ref="base.user_admin"/>
+    </record>
+
+    <!-- Experiment Resource Allocation -->
+    <record id="demo_experiment_resource_1" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_1"/>
+        <field name="resource_id" ref="demo_resource_1"/>
+        <field name="purpose">Training transformer baseline models</field>
+        <field name="quantity">4.0</field>
+    </record>
+
+    <!-- Output Demo Data -->
+    <record id="demo_output_1" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_1"/>
+        <field name="output_type">paper</field>
+        <field name="name">Deep Learning Approaches for Dynamic Research Supply Chain Routing</field>
+        <field name="status">draft</field>
+    </record>
+
+    <!-- Research Paper Demo Data -->
+    <record id="demo_paper_1" model="research.paper">
+        <field name="paper_name">Deep Learning Approaches for Dynamic Research Supply Chain Routing</field>
+        <field name="paper_author">Jane Doe, John Smith</field>
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="output_id" ref="demo_output_1"/>
+        <field name="paper_status">draft</field>
+        <field name="paper_abstract">This paper presents a novel graph neural network architecture for optimizing resource allocation in multi-institutional research projects.</field>
+    </record>
+
+</odoo>

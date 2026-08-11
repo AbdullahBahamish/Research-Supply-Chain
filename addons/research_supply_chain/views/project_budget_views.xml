@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Project Budget List View -->
+    <record id="view_project_budget_list" model="ir.ui.view">
+        <field name="name">project.budget.list</field>
+        <field name="model">project.budget</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="project_id"/>
+                <field name="currency_id"/>
+                <field name="total_amount"/>
+                <field name="spent_amount"/>
+                <field name="remaining_amount"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Project Budget Form View -->
+    <record id="view_project_budget_form" model="ir.ui.view">
+        <field name="name">project.budget.form</field>
+        <field name="model">project.budget</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="currency_id"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    <group string="Financial Breakdown">
+                        <group>
+                            <field name="total_amount"/>
+                            <field name="spent_amount"/>
+                        </group>
+                        <group>
+                            <field name="remaining_amount"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Project Budget Action -->
+    <record id="action_project_budget" model="ir.actions.act_window">
+        <field name="name">Project Budgets</field>
+        <field name="res_model">project.budget</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

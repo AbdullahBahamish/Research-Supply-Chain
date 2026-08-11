@@ -10,6 +10,7 @@
                 <field name="paper_name"/>
                 <field name="paper_author"/>
                 <field name="project_id"/>
+                <field name="output_id"/>
                 <field name="paper_publication_date"/>
                 <field name="paper_status"/>
             </list>
@@ -47,6 +48,7 @@
                         <group>
                             <field name="paper_publication_date"/>
                             <field name="paper_doi"/>
+                            <field name="output_id"/>
                         </group>
                     </group>
 
@@ -69,14 +71,5 @@
         <field name="res_model">research.paper</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Research Papers Menu -->
-    <menuitem
-        id="menu_research_paper"
-        name="Research Papers"
-        parent="menu_research_supply_chain_root"
-        action="action_research_paper"
-        sequence="20"
-    />
 
 </odoo>

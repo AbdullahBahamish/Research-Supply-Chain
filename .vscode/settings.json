@@ -1,0 +1,8 @@
+{
+  "python.analysis.extraPaths": [
+    "D:/Program Files D/Odoo 19.0.20260810/server"
+  ],
+  "python.autoComplete.extraPaths": [
+    "D:/Program Files D/Odoo 19.0.20260810/server"
+  ]
+}

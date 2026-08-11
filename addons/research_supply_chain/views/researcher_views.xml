@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Researcher List View -->
+    <record id="view_researcher_list" model="ir.ui.view">
+        <field name="name">research.researcher.list</field>
+        <field name="model">research.researcher</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="position"/>
+                <field name="is_principal"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Researcher Form View -->
+    <record id="view_researcher_form" model="ir.ui.view">
+        <field name="name">research.researcher.form</field>
+        <field name="model">research.researcher</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="name"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="position"/>
+                            <field name="is_principal"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Expertise">
+                            <field name="expertise"/>
+                        </page>
+                        <page string="Project Allocations">
+                            <field name="project_line_ids">
+                                <list>
+                                    <field name="project_id"/>
+                                    <field name="role"/>
+                                    <field name="allocated_pct"/>
+                                    <field name="join_date"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Researcher Action -->
+    <record id="action_researcher" model="ir.actions.act_window">
+        <field name="name">Researchers</field>
+        <field name="res_model">research.researcher</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root Menu -->
+    <menuitem
+        id="menu_research_supply_chain_root"
+        name="Research Supply Chain"
+        action="action_research_project"
+        web_icon="research_supply_chain,static/description/icon.png"
+        sequence="10"
+    />
+
+    <!-- Projects & Team Category -->
+    <menuitem
+        id="menu_projects_team"
+        name="Projects &amp; Team"
+        parent="menu_research_supply_chain_root"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_research_project"
+        name="Projects"
+        parent="menu_projects_team"
+        action="action_research_project"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_researcher"
+        name="Researchers"
+        parent="menu_projects_team"
+        action="action_researcher"
+        sequence="20"
+    />
+
+    <!-- Requirements & Resources Category -->
+    <menuitem
+        id="menu_req_res"
+        name="Requirements &amp; Resources"
+        parent="menu_research_supply_chain_root"
+        sequence="20"
+    />
+    <menuitem
+        id="menu_research_requirement"
+        name="Requirements"
+        parent="menu_req_res"
+        action="action_research_requirement"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_research_resource"
+        name="Resources"
+        parent="menu_req_res"
+        action="action_research_resource"
+        sequence="20"
+    />
+
+    <!-- Execution Category -->
+    <menuitem
+        id="menu_execution"
+        name="Execution"
+        parent="menu_research_supply_chain_root"
+        sequence="30"
+    />
+    <menuitem
+        id="menu_experiment"
+        name="Experiments"
+        parent="menu_execution"
+        action="action_experiment"
+        sequence="10"
+    />
+
+    <!-- Outputs Category -->
+    <menuitem
+        id="menu_outputs"
+        name="Outputs"
+        parent="menu_research_supply_chain_root"
+        sequence="40"
+    />
+    <menuitem
+        id="menu_research_output"
+        name="Outputs"
+        parent="menu_outputs"
+        action="action_research_output"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_research_paper"
+        name="Research Papers"
+        parent="menu_outputs"
+        action="action_research_paper"
+        sequence="20"
+    />
+
+    <!-- Finance Category -->
+    <menuitem
+        id="menu_finance"
+        name="Finance"
+        parent="menu_research_supply_chain_root"
+        sequence="50"
+    />
+    <menuitem
+        id="menu_project_budget"
+        name="Project Budgets"
+        parent="menu_finance"
+        action="action_project_budget"
+        sequence="10"
+    />
+
+</odoo>

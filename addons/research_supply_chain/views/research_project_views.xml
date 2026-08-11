@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <odoo>
 
     <!-- Research Project List View -->
@@ -10,6 +9,7 @@
             <list>
                 <field name="code"/>
                 <field name="project_name"/>
+                <field name="lead_researcher_id"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="project_status"/>
@@ -23,15 +23,16 @@
         <field name="model">research.project</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <field name="project_status" widget="statusbar" statusbar_visible="proposed,approved,in_progress,completed,archived"/>
+                </header>
                 <sheet>
-
                     <group>
                         <group>
                             <field name="code"/>
                             <field name="project_name"/>
-                            <field name="project_status"/>
+                            <field name="lead_researcher_id"/>
                         </group>
-
                         <group>
                             <field name="start_date"/>
                             <field name="end_date"/>
@@ -40,9 +41,65 @@
                     </group>
 
                     <notebook>
-
                         <page string="Description">
                             <field name="project_description"/>
+                        </page>
+
+                        <page string="Team Members">
+                            <field name="researcher_line_ids">
+                                <list editable="bottom">
+                                    <field name="researcher_id"/>
+                                    <field name="role"/>
+                                    <field name="allocated_pct"/>
+                                    <field name="join_date"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Budgets">
+                            <field name="budget_ids">
+                                <list>
+                                    <field name="currency_id"/>
+                                    <field name="total_amount"/>
+                                    <field name="spent_amount"/>
+                                    <field name="remaining_amount"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Requirements">
+                            <field name="requirement_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                    <field name="quantity"/>
+                                    <field name="priority"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Owned Resources">
+                            <field name="resource_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="resource_type"/>
+                                    <field name="availability_status"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Experiments">
+                            <field name="experiment_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="status"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                </list>
+                            </field>
                         </page>
 
                         <page string="Research Papers">
@@ -55,9 +112,7 @@
                                 </list>
                             </field>
                         </page>
-
                     </notebook>
-
                 </sheet>
             </form>
         </field>
@@ -69,21 +124,5 @@
         <field name="res_model">research.project</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <!-- Research Supply Chain Root Menu -->
-    <menuitem
-        id="menu_research_supply_chain_root"
-        name="Research Supply Chain"
-        sequence="10"
-    />
-
-    <!-- Research Projects Menu -->
-    <menuitem
-        id="menu_research_project"
-        name="Research Projects"
-        parent="menu_research_supply_chain_root"
-        action="action_research_project"
-        sequence="10"
-    />
 
 </odoo>

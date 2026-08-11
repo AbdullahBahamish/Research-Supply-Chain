@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Research Output List View -->
+    <record id="view_research_output_list" model="ir.ui.view">
+        <field name="name">research.output.list</field>
+        <field name="model">research.output</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="output_type"/>
+                <field name="experiment_id"/>
+                <field name="project_id"/>
+                <field name="status"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Research Output Form View -->
+    <record id="view_research_output_form" model="ir.ui.view">
+        <field name="name">research.output.form</field>
+        <field name="model">research.output</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,under_review,accepted,published"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="output_type"/>
+                        </group>
+                        <group>
+                            <field name="experiment_id"/>
+                            <field name="project_id"/>
+                            <field name="create_date" string="Created At"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Research Output Action -->
+    <record id="action_research_output" model="ir.actions.act_window">
+        <field name="name">Research Outputs</field>
+        <field name="res_model">research.output</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
