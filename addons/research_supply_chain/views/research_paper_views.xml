@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Research Paper List View -->
+    <record id="view_research_paper_list" model="ir.ui.view">
+        <field name="name">research.paper.list</field>
+        <field name="model">research.paper</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="paper_name"/>
+                <field name="paper_author"/>
+                <field name="project_id"/>
+                <field name="paper_publication_date"/>
+                <field name="paper_status"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Research Paper Form View -->
+    <record id="view_research_paper_form" model="ir.ui.view">
+        <field name="name">research.paper.form</field>
+        <field name="model">research.paper</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+                        name="action_submit"
+                        string="Submit"
+                        type="object"
+                        class="btn-primary"
+                        invisible="paper_status != 'draft'"
+                    />
+                    <field
+                        name="paper_status"
+                        widget="statusbar"
+                        statusbar_visible="draft,submitted,published,archived"
+                    />
+                </header>
+
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="paper_name"/>
+                            <field name="paper_author"/>
+                            <field name="project_id"/>
+                        </group>
+                        <group>
+                            <field name="paper_publication_date"/>
+                            <field name="paper_doi"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Abstract">
+                            <field name="paper_abstract"/>
+                        </page>
+                        <page string="Repository">
+                            <field name="paper_github_url"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Research Paper Action -->
+    <record id="action_research_paper" model="ir.actions.act_window">
+        <field name="name">Research Papers</field>
+        <field name="res_model">research.paper</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Research Papers Menu -->
+    <menuitem
+        id="menu_research_paper"
+        name="Research Papers"
+        parent="menu_research_supply_chain_root"
+        action="action_research_paper"
+        sequence="20"
+    />
+
+</odoo>

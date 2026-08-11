@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo> 
+
+    <record id="seq_research_project" model="ir.sequence">
+        <field name="name">Research Project</field>  
+        <field name="code">research.project</field>  
+        <field name="prefix">S</field>  
+        <field name="padding">1</field>  
+    </record>
+
+</odoo>

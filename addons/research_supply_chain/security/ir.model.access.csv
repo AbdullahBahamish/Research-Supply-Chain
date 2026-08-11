@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id,perm_read,perm_write,perm_create,perm_unlink
+access_research_paper,research.paper,model_research_paper,,1,1,1,1
+access_research_project,research.project,model_research_project,,1,1,1,1

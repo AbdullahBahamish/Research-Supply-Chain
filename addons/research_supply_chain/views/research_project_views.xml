@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <!-- Research Project List View -->
+    <record id="view_research_project_list" model="ir.ui.view">
+        <field name="name">research.project.list</field>
+        <field name="model">research.project</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="project_name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="project_status"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Research Project Form View -->
+    <record id="view_research_project_form" model="ir.ui.view">
+        <field name="name">research.project.form</field>
+        <field name="model">research.project</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="project_name"/>
+                            <field name="project_status"/>
+                        </group>
+
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+
+                        <page string="Description">
+                            <field name="project_description"/>
+                        </page>
+
+                        <page string="Research Papers">
+                            <field name="paper_ids">
+                                <list>
+                                    <field name="paper_name"/>
+                                    <field name="paper_author"/>
+                                    <field name="paper_publication_date"/>
+                                    <field name="paper_status"/>
+                                </list>
+                            </field>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Research Project Action -->
+    <record id="action_research_project" model="ir.actions.act_window">
+        <field name="name">Research Projects</field>
+        <field name="res_model">research.project</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Research Supply Chain Root Menu -->
+    <menuitem
+        id="menu_research_supply_chain_root"
+        name="Research Supply Chain"
+        sequence="10"
+    />
+
+    <!-- Research Projects Menu -->
+    <menuitem
+        id="menu_research_project"
+        name="Research Projects"
+        parent="menu_research_supply_chain_root"
+        action="action_research_project"
+        sequence="10"
+    />
+
+</odoo>
