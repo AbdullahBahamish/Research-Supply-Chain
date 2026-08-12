@@ -29,13 +29,17 @@ class ResearchProjectResearcher(models.Model):
         default=fields.Date.context_today,
     )
 
-    _sql_constraints = [
-        (
-            "project_researcher_unique",
-            "unique(project_id, researcher_id)",
-            "A researcher can only be added once per project.",
-        ),
-    ]
+    @api.constrains("project_id", "researcher_id")
+    def _check_project_researcher_unique(self):
+        for record in self:
+            if record.project_id and record.researcher_id:
+                count = self.search_count([
+                    ("project_id", "=", record.project_id.id),
+                    ("researcher_id", "=", record.researcher_id.id),
+                    ("id", "!=", record.id),
+                ])
+                if count > 0:
+                    raise ValidationError("A researcher can only be added once per project.")
 
     @api.constrains("allocated_pct")
     def _check_allocated_pct(self):

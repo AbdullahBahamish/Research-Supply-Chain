@@ -42,13 +42,16 @@ class ProjectBudget(models.Model):
         string="End Date",
     )
 
-    _sql_constraints = [
-        (
-            "project_budget_unique",
-            "unique(project_id)",
-            "A project can only have one budget record.",
-        ),
-    ]
+    @api.constrains("project_id")
+    def _check_project_budget_unique(self):
+        for record in self:
+            if record.project_id:
+                count = self.search_count([
+                    ("project_id", "=", record.project_id.id),
+                    ("id", "!=", record.id),
+                ])
+                if count > 0:
+                    raise ValidationError("A project can only have one budget record.")
 
     @api.depends("total_amount", "spent_amount")
     def _compute_remaining_amount(self):

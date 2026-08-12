@@ -9,3 +9,4 @@ access_research_experiment_user,research.experiment.user,model_research_experime
 access_research_experiment_resource_user,research.experiment.resource.user,model_research_experiment_resource,base.group_user,1,1,1,1
 access_research_output_user,research.output.user,model_research_output,base.group_user,1,1,1,1
 access_research_paper_user,research.paper.user,model_research_paper,base.group_user,1,1,1,1
+access_research_sample_data_wizard_user,research.sample.data.wizard.user,model_research_sample_data_wizard,base.group_user,1,1,1,1

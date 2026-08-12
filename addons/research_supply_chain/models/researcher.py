@@ -1,4 +1,5 @@
-from odoo import models, fields  # type: ignore  # pyfly: ignore [missing-import]
+from odoo import models, fields, api  # type: ignore  # pyfly: ignore [missing-import]
+from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
 
 class Researcher(models.Model):
     _name = "research.researcher"
@@ -41,10 +42,8 @@ class Researcher(models.Model):
         string="Project Allocations",
     )
 
-    _sql_constraints = [
-        (
-            "user_id_unique",
-            "unique(user_id)",
-            "A researcher profile already exists for this user account.",
-        ),
-    ]
+    @api.constrains("user_id")
+    def _check_user_id_unique(self):
+        for record in self:
+            if record.user_id and self.search_count([("user_id", "=", record.user_id.id), ("id", "!=", record.id)]) > 0:
+                raise ValidationError("A researcher profile already exists for this user account.")

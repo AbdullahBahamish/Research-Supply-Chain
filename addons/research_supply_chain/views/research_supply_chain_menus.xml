@@ -106,4 +106,19 @@
         sequence="10"
     />
 
+    <!-- Tools Category -->
+    <menuitem
+        id="menu_tools"
+        name="Tools"
+        parent="menu_research_supply_chain_root"
+        sequence="60"
+    />
+    <menuitem
+        id="menu_generate_sample_data"
+        name="Generate Sample Data"
+        parent="menu_tools"
+        action="action_research_sample_data_wizard"
+        sequence="10"
+    />
+
 </odoo>

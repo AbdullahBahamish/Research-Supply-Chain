@@ -8,3 +8,4 @@ from . import experiment
 from . import experiment_resource
 from . import research_output
 from . import research_paper
+from . import sample_data_wizard

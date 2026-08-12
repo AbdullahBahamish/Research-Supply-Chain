@@ -12,17 +12,17 @@ class Experiment(models.Model):
         required=True,
         ondelete="cascade",
     )
-    experiment_name = fields.Char(
+    name = fields.Char(
         string="Experiment Title",
         required=True,
     )
-    experiment_objective = fields.Text(
+    objective = fields.Text(
         string="Objective",
     )
-    experiment_methodology = fields.Text(
+    methodology = fields.Text(
         string="Methodology",
     )
-    experiment_status = fields.Selection(
+    status = fields.Selection(
         [
             ("planned", "Planned"),
             ("running", "Running"),
@@ -33,13 +33,13 @@ class Experiment(models.Model):
         default="planned",
         required=True,
     )
-    experiment_start_date = fields.Date(
+    start_date = fields.Date(
         string="Start Date",
     )
-    experiment_end_date = fields.Date(
+    end_date = fields.Date(
         string="End Date",
     )
-    experiment_created_by = fields.Many2one(
+    created_by = fields.Many2one(
         "res.users",
         string="Created By",
         default=lambda self: self.env.user,
@@ -50,7 +50,7 @@ class Experiment(models.Model):
         "experiment_id",
         string="Used Resources",
     )
-    experiment_output_ids = fields.One2many(
+    output_ids = fields.One2many(
         "research.output",
         "experiment_id",
         string="Outputs",
@@ -61,4 +61,3 @@ class Experiment(models.Model):
         for record in self:
             if record.start_date and record.end_date and record.end_date < record.start_date:
                 raise ValidationError("Experiment end date cannot be earlier than start date.")
-0

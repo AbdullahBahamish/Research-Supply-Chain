@@ -1,18 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Additional Demo User Accounts -->
+    <record id="demo_user_alice" model="res.users">
+        <field name="name">Dr. Alice Vance</field>
+        <field name="login">alice.vance@research.example.com</field>
+        <field name="email">alice.vance@research.example.com</field>
+    </record>
+
+    <record id="demo_user_bob" model="res.users">
+        <field name="name">Dr. Bob Martinez</field>
+        <field name="login">bob.martinez@research.example.com</field>
+        <field name="email">bob.martinez@research.example.com</field>
+    </record>
+
+    <record id="demo_user_carol" model="res.users">
+        <field name="name">Dr. Carol Danvers</field>
+        <field name="login">carol.danvers@research.example.com</field>
+        <field name="email">carol.danvers@research.example.com</field>
+    </record>
+
     <!-- Researcher Demo Data -->
     <record id="demo_researcher_1" model="research.researcher">
         <field name="user_id" ref="base.user_admin"/>
         <field name="position">Principal Investigator</field>
-        <field name="expertise">Artificial Intelligence, Operations Research</field>
+        <field name="expertise">Artificial Intelligence, Operations Research, Graph Neural Networks</field>
         <field name="is_principal">True</field>
     </record>
 
     <record id="demo_researcher_2" model="research.researcher">
-        <field name="user_id" ref="base.user_demo"/>
+        <field name="user_id" ref="demo_user_carol"/>
         <field name="position">Postdoctoral Researcher</field>
-        <field name="expertise">Data Engineering, Machine Learning</field>
+        <field name="expertise">Data Engineering, Machine Learning, Pipeline Orchestration</field>
+        <field name="is_principal">False</field>
+    </record>
+
+    <record id="demo_researcher_3" model="research.researcher">
+        <field name="user_id" ref="demo_user_alice"/>
+        <field name="position">Senior Bioinformatician</field>
+        <field name="expertise">Genomics, High Performance Computing, Distributed Storage</field>
+        <field name="is_principal">True</field>
+    </record>
+
+    <record id="demo_researcher_4" model="research.researcher">
+        <field name="user_id" ref="demo_user_bob"/>
+        <field name="position">Quantum Computing Scientist</field>
+        <field name="expertise">Quantum Algorithms, Combinatorial Optimization, Cryptography</field>
         <field name="is_principal">False</field>
     </record>
 
@@ -24,6 +57,33 @@
         <field name="start_date">2026-01-01</field>
         <field name="end_date">2026-12-31</field>
         <field name="project_status">in_progress</field>
+    </record>
+
+    <record id="demo_project_2" model="research.project">
+        <field name="project_name">Quantum-Accelerated Network Flow Optimization</field>
+        <field name="project_description">Investigating Variational Quantum Eigensolvers for solving NP-hard multi-commodity research supply chain flow problems.</field>
+        <field name="lead_researcher_id" ref="demo_researcher_4"/>
+        <field name="start_date">2026-02-15</field>
+        <field name="end_date">2027-02-14</field>
+        <field name="project_status">approved</field>
+    </record>
+
+    <record id="demo_project_3" model="research.project">
+        <field name="project_name">Genomic Sequencing Data Supply Chain Pipeline</field>
+        <field name="project_description">Architecting high-throughput biological sample tracking and real-time genomic data sequencing supply chain workflows.</field>
+        <field name="lead_researcher_id" ref="demo_researcher_3"/>
+        <field name="start_date">2025-09-01</field>
+        <field name="end_date">2026-08-31</field>
+        <field name="project_status">in_progress</field>
+    </record>
+
+    <record id="demo_project_4" model="research.project">
+        <field name="project_name">Autonomous Last-Mile Logistics Testbed</field>
+        <field name="project_description">Deploying micro-drone fleets to deliver critical lab re-agents across campus research units.</field>
+        <field name="lead_researcher_id" ref="demo_researcher_1"/>
+        <field name="start_date">2026-04-01</field>
+        <field name="end_date">2026-10-31</field>
+        <field name="project_status">proposed</field>
     </record>
 
     <!-- Project Researcher Team Allocation -->
@@ -38,19 +98,62 @@
     <record id="demo_project_researcher_2" model="research.project.researcher">
         <field name="project_id" ref="demo_project_1"/>
         <field name="researcher_id" ref="demo_researcher_2"/>
-        <field name="role">Primary Researcher</field>
+        <field name="role">Primary Machine Learning Researcher</field>
         <field name="allocated_pct">100.0</field>
         <field name="join_date">2026-01-15</field>
+    </record>
+
+    <record id="demo_project_researcher_3" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="researcher_id" ref="demo_researcher_4"/>
+        <field name="role">Principal Quantum Architect</field>
+        <field name="allocated_pct">80.0</field>
+        <field name="join_date">2026-02-15</field>
+    </record>
+
+    <record id="demo_project_researcher_4" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="researcher_id" ref="demo_researcher_3"/>
+        <field name="role">Bioinformatics Lead</field>
+        <field name="allocated_pct">75.0</field>
+        <field name="join_date">2025-09-01</field>
     </record>
 
     <!-- Project Budget Demo Data -->
     <record id="demo_budget_1" model="project.budget">
         <field name="project_id" ref="demo_project_1"/>
         <field name="currency_id" ref="base.USD"/>
-        <field name="total_amount">100000.00</field>
-        <field name="spent_amount">25000.00</field>
+        <field name="total_amount">150000.00</field>
+        <field name="spent_amount">45000.00</field>
         <field name="start_date">2026-01-01</field>
         <field name="end_date">2026-12-31</field>
+    </record>
+
+    <record id="demo_budget_2" model="project.budget">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="total_amount">300000.00</field>
+        <field name="spent_amount">120000.00</field>
+        <field name="start_date">2026-02-15</field>
+        <field name="end_date">2027-02-14</field>
+    </record>
+
+    <record id="demo_budget_3" model="project.budget">
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="total_amount">200000.00</field>
+        <field name="spent_amount">80000.00</field>
+        <field name="start_date">2025-09-01</field>
+        <field name="end_date">2026-08-31</field>
+    </record>
+
+    <record id="demo_budget_4" model="project.budget">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="total_amount">90000.00</field>
+        <field name="spent_amount">15000.00</field>
+        <field name="start_date">2026-04-01</field>
+        <field name="end_date">2026-10-31</field>
     </record>
 
     <!-- Requirement Demo Data -->
@@ -66,6 +169,30 @@
         <field name="needed_by">2026-02-01</field>
     </record>
 
+    <record id="demo_requirement_2" model="research.requirement">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="name">Quantum Processing Unit (QPU) Cloud Allocation</field>
+        <field name="category">service</field>
+        <field name="description">Access to 127-qubit quantum backend for algorithm validation.</field>
+        <field name="quantity">50.0</field>
+        <field name="priority">high</field>
+        <field name="status">requested</field>
+        <field name="requested_date">2026-02-20</field>
+        <field name="needed_by">2026-03-15</field>
+    </record>
+
+    <record id="demo_requirement_3" model="research.requirement">
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="name">100TB High-Throughput NVMe SAN Array</field>
+        <field name="category">hardware</field>
+        <field name="description">Dedicated fast storage buffer for raw sequencers outputs.</field>
+        <field name="quantity">1.0</field>
+        <field name="priority">medium</field>
+        <field name="status">fulfilled</field>
+        <field name="requested_date">2025-09-10</field>
+        <field name="needed_by">2025-10-01</field>
+    </record>
+
     <!-- Resource Demo Data -->
     <record id="demo_resource_1" model="research.resource">
         <field name="name">NVIDIA H100 GPU Server Cluster</field>
@@ -74,6 +201,33 @@
         <field name="specification">8x H100 80GB PCIe, Dual AMD EPYC 9654, 1.5TB RAM</field>
         <field name="availability_status">in_use</field>
         <field name="owner_project_id" ref="demo_project_1"/>
+    </record>
+
+    <record id="demo_resource_2" model="research.resource">
+        <field name="name">IBM Quantum Eagle QPU Simulator Channel</field>
+        <field name="resource_type">service</field>
+        <field name="description">Cloud cloud quantum API instance.</field>
+        <field name="specification">127-qubit noisy intermediate-scale quantum backend</field>
+        <field name="availability_status">available</field>
+        <field name="owner_project_id" ref="demo_project_2"/>
+    </record>
+
+    <record id="demo_resource_3" model="research.resource">
+        <field name="name">Illumina NovaSeq 6000 Sequencing Array</field>
+        <field name="resource_type">equipment</field>
+        <field name="description">High throughput DNA/RNA sequencing unit.</field>
+        <field name="specification">Dual flow cell configuration, up to 6TB output per run</field>
+        <field name="availability_status">in_use</field>
+        <field name="owner_project_id" ref="demo_project_3"/>
+    </record>
+
+    <record id="demo_resource_4" model="research.resource">
+        <field name="name">RTK-GPS Quadcopter Drone Testbed Array</field>
+        <field name="resource_type">equipment</field>
+        <field name="description">Precision flight drones equipped with temperature-controlled payload boxes.</field>
+        <field name="specification">Carbon fiber airframe, PX4 autopilot, RTK-GPS centimeter precision</field>
+        <field name="availability_status">available</field>
+        <field name="owner_project_id" ref="demo_project_4"/>
     </record>
 
     <!-- Experiment Demo Data -->
@@ -87,12 +241,47 @@
         <field name="created_by" ref="base.user_admin"/>
     </record>
 
+    <record id="demo_experiment_2" model="research.experiment">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="name">VQE Quantum Routing Simulation</field>
+        <field name="objective">Test Variational Quantum Eigensolver convergence on 16-node graph instances.</field>
+        <field name="methodology">Simulate ansatz circuit execution under realistic depolarizing noise models.</field>
+        <field name="status">running</field>
+        <field name="start_date">2026-03-01</field>
+        <field name="created_by" ref="demo_user_bob"/>
+    </record>
+
+    <record id="demo_experiment_3" model="research.experiment">
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="name">FastQ Stream Compression &amp; Alignment Benchmark</field>
+        <field name="objective">Measure latency reduction when aligning genomic streams directly in NVMe buffer memory.</field>
+        <field name="methodology">Compare BWA-MEM2 multithreaded performance vs GPU-accelerated Clara Genomics pipeline.</field>
+        <field name="status">completed</field>
+        <field name="start_date">2025-11-01</field>
+        <field name="end_date">2025-12-15</field>
+        <field name="created_by" ref="demo_user_alice"/>
+    </record>
+
     <!-- Experiment Resource Allocation -->
     <record id="demo_experiment_resource_1" model="research.experiment.resource">
         <field name="experiment_id" ref="demo_experiment_1"/>
         <field name="resource_id" ref="demo_resource_1"/>
         <field name="purpose">Training transformer baseline models</field>
         <field name="quantity">4.0</field>
+    </record>
+
+    <record id="demo_experiment_resource_2" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_2"/>
+        <field name="resource_id" ref="demo_resource_2"/>
+        <field name="purpose">Circuit execution on QPU backend</field>
+        <field name="quantity">1.0</field>
+    </record>
+
+    <record id="demo_experiment_resource_3" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_3"/>
+        <field name="resource_id" ref="demo_resource_3"/>
+        <field name="purpose">Raw sequence data ingestion</field>
+        <field name="quantity">1.0</field>
     </record>
 
     <!-- Output Demo Data -->
@@ -103,14 +292,53 @@
         <field name="status">draft</field>
     </record>
 
+    <record id="demo_output_2" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_2"/>
+        <field name="output_type">paper</field>
+        <field name="name">Quantum Approximate Optimization Algorithms for Multi-Depot Vehicle Routing</field>
+        <field name="status">under_review</field>
+    </record>
+
+    <record id="demo_output_3" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_3"/>
+        <field name="output_type">dataset</field>
+        <field name="name">High-Throughput Genomic Supply Chain Benchmark Dataset</field>
+        <field name="status">published</field>
+    </record>
+
     <!-- Research Paper Demo Data -->
     <record id="demo_paper_1" model="research.paper">
         <field name="paper_name">Deep Learning Approaches for Dynamic Research Supply Chain Routing</field>
-        <field name="paper_author">Jane Doe, John Smith</field>
+        <field name="paper_author">Jane Doe, John Smith, Dr. Alice Vance</field>
         <field name="project_id" ref="demo_project_1"/>
         <field name="output_id" ref="demo_output_1"/>
         <field name="paper_status">draft</field>
         <field name="paper_abstract">This paper presents a novel graph neural network architecture for optimizing resource allocation in multi-institutional research projects.</field>
+        <field name="paper_github_url">https://github.com/example/research-supply-chain-ai</field>
+    </record>
+
+    <record id="demo_paper_2" model="research.paper">
+        <field name="paper_name">Quantum Approximate Optimization Algorithms for Multi-Depot Vehicle Routing</field>
+        <field name="paper_author">Dr. Bob Martinez, Jane Doe</field>
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="output_id" ref="demo_output_2"/>
+        <field name="paper_status">submitted</field>
+        <field name="paper_doi">10.1016/j.jocs.2026.102341</field>
+        <field name="paper_abstract">We demonstrate a 14x speedup in finding near-optimal allocation schedules for multi-commodity research supply chains using parameter-tuned QAOA circuits.</field>
+        <field name="paper_github_url">https://github.com/example/quantum-routing-qaoa</field>
+    </record>
+
+    <record id="demo_paper_3" model="research.paper">
+        <field name="paper_name">High-Performance Genomic Data Pipelines for Supply Chain Tracking</field>
+        <field name="paper_author">Dr. Alice Vance, John Smith</field>
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="output_id" ref="demo_output_3"/>
+        <field name="paper_publication_date">2026-01-15</field>
+        <field name="paper_status">published</field>
+        <field name="paper_doi">10.1038/s41587-025-01998-x</field>
+        <field name="paper_abstract">An end-to-end biological specimen tracking framework using distributed ledger technology and real-time streaming genomic alignment.</field>
+        <field name="paper_github_url">https://github.com/example/genomic-supply-chain</field>
     </record>
 
 </odoo>
+
