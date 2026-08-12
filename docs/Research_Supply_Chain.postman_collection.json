@@ -1,0 +1,223 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Research Supply Chain - Odoo 19 API Collection",
+    "description": "Official Postman API Collection for testing and integrating with the Research Supply Chain Odoo 19 module.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8069",
+      "type": "string"
+    },
+    {
+      "key": "db_name",
+      "value": "ODOO_FirstDB",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "admin",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Authentication",
+      "item": [
+        {
+          "name": "Authenticate / Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"db\": \"{{db_name}}\",\n    \"login\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/web/session/authenticate",
+              "host": ["{{base_url}}"],
+              "path": ["web", "session", "authenticate"]
+            },
+            "description": "Authenticates user session with Odoo server and sets session cookie in Postman."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - REST API Endpoints",
+      "item": [
+        {
+          "name": "Get All Projects",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"limit\": 50\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects"]
+            },
+            "description": "Fetches list of research projects."
+          }
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"vals\": {\n      \"project_name\": \"Postman API Integration Test Project\",\n      \"project_description\": \"Created via Postman REST API Test Collection\",\n      \"project_status\": \"in_progress\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/project/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "project", "create"]
+            },
+            "description": "Creates a new research project record."
+          }
+        },
+        {
+          "name": "Get All Researchers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/researchers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "researchers"]
+            },
+            "description": "Fetches active researchers list."
+          }
+        },
+        {
+          "name": "Get All Experiments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/experiments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "experiments"]
+            },
+            "description": "Fetches research experiments list."
+          }
+        },
+        {
+          "name": "Get All Papers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/papers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "papers"]
+            },
+            "description": "Fetches research papers list."
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Native Odoo ORM API (call_kw)",
+      "item": [
+        {
+          "name": "ORM: Search Read Projects",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\n    \"model\": \"research.project\",\n    \"method\": \"search_read\",\n    \"args\": [[]],\n    \"kwargs\": {\n      \"fields\": [\"code\", \"project_name\", \"project_status\", \"start_date\", \"end_date\"]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/web/dataset/call_kw/research.project/search_read",
+              "host": ["{{base_url}}"],
+              "path": ["web", "dataset", "call_kw", "research.project", "search_read"]
+            },
+            "description": "Calls native Odoo ORM search_read on research.project model."
+          }
+        },
+        {
+          "name": "ORM: Search Read Budgets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\n    \"model\": \"project.budget\",\n    \"method\": \"search_read\",\n    \"args\": [[]],\n    \"kwargs\": {\n      \"fields\": [\"project_id\", \"total_amount\", \"spent_amount\", \"remaining_amount\"]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/web/dataset/call_kw/project.budget/search_read",
+              "host": ["{{base_url}}"],
+              "path": ["web", "dataset", "call_kw", "project.budget", "search_read"]
+            },
+            "description": "Calls native Odoo ORM search_read on project.budget model."
+          }
+        }
+      ]
+    }
+  ]
+}

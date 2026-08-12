@@ -2,6 +2,18 @@
 
 An open-source **Odoo 19** module for managing the lifecycle of research projects, team allocations, project requirements, shared resources, experimental runs, project budgets, and research outputs.
 
+## 📖 Documentation Suite
+
+Comprehensive technical documentation is available in the **[`docs/`](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/)** folder:
+
+- 📘 **[Documentation Index](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/INDEX.md)** — Main documentation hub & executive overview.
+- 🏛️ **[Architecture & System Design](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/ARCHITECTURE.md)** — System layers, Mermaid ER diagram, and security matrix.
+- 📊 **[Data Models Specification](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/DATA_MODELS.md)** — Exhaustive field-by-field reference for all 10 Odoo models.
+- 📡 **[API Specification & Reference](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/API_DOCUMENTATION.md)** — Endpoints, JSON payloads, responses, and error specs.
+- 🚀 **[Postman API Testing Guide](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/POSTMAN_API_GUIDE.md)** — Pre-built Postman collection & endpoint guide.
+- 🧪 **[Testing & Synthetic Data](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/TESTING_AND_DATA_GENERATION.md)** — XML, Python Shell, and UI Wizard test data pipelines.
+- 🚀 **[Getting Started & Deployment](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/GETTING_STARTED.md)** — Installation, environment setup, and troubleshooting guide.
+
 ---
 
 ## 📌 Architecture Overview
