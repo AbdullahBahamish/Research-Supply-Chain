@@ -3,6 +3,7 @@ from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [mi
 
 class ProjectBudget(models.Model):
     _name = "project.budget"
+    _inherit = ["research.audit.mixin"]
     _description = "Project Budget"
     _rec_name = "project_id"
 
@@ -71,3 +72,46 @@ class ProjectBudget(models.Model):
         for record in self:
             if record.start_date and record.end_date and record.end_date < record.start_date:
                 raise ValidationError("Budget end date cannot be earlier than start date.")
+
+    # ------------------ Magic Methods & Operator Overloading ------------------
+
+    def __str__(self) -> str:
+        """Magic Method: Friendly string formatting."""
+        return f"ProjectBudget(Project={self.project_id.project_name}, Total=${self.total_amount:,.2f})"
+
+    def __add__(self, other: "ProjectBudget") -> dict:
+        """Operator Overloading: Overloads '+' to calculate combined budget totals."""
+        if not isinstance(other, ProjectBudget):
+            return NotImplemented
+        return {
+            "combined_total": self.total_amount + other.total_amount,
+            "combined_spent": self.spent_amount + other.spent_amount,
+            "combined_remaining": self.remaining_amount + other.remaining_amount,
+        }
+
+    def __eq__(self, other) -> bool:
+        """Operator Overloading: Overloads '==' to compare budget amounts."""
+        if not isinstance(other, ProjectBudget):
+            return False
+        return self.total_amount == other.total_amount
+
+    def is_budget_positive(self) -> bool:
+        """Domain Helper: Checks if remaining budget amount is positive (> 0.0)."""
+        self.ensure_one()
+        return self.remaining_amount > 0.0
+
+    # ------------------ Properties & Error Handling ------------------
+
+    @property
+    def utilization_percentage(self) -> float:
+        """Property: Managed getter calculating budget utilization percentage."""
+        try:
+            percentage = (self.spent_amount / self.total_amount) * 100.0
+        except ZeroDivisionError:
+            percentage = 0.0
+        else:
+            pass  # Executed if no exception occurred
+        finally:
+            pass  # Always executed for cleanup
+        return percentage
+

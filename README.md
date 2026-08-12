@@ -9,6 +9,7 @@ Comprehensive technical documentation is available in the **[`docs/`](file:///d:
 - 📘 **[Documentation Index](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/INDEX.md)** — Main documentation hub & executive overview.
 - 🏛️ **[Architecture & System Design](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/ARCHITECTURE.md)** — System layers, Mermaid ER diagram, and security matrix.
 - 📊 **[Data Models Specification](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/DATA_MODELS.md)** — Exhaustive field-by-field reference for all 10 Odoo models.
+- 🐍 **[Advanced Python Concepts Guide](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/PYTHON_CONCEPTS_GUIDE.md)** — Hands-on implementation of OOP, decorators, regex, recursion, & iterators.
 - 📡 **[API Specification & Reference](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/API_DOCUMENTATION.md)** — Endpoints, JSON payloads, responses, and error specs.
 - 🚀 **[Postman API Testing Guide](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/POSTMAN_API_GUIDE.md)** — Pre-built Postman collection & endpoint guide.
 - 🧪 **[Testing & Synthetic Data](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/TESTING_AND_DATA_GENERATION.md)** — XML, Python Shell, and UI Wizard test data pipelines.
@@ -115,4 +116,4 @@ Automated test coverage is provided under `addons/research_supply_chain/tests/`:
 ---
 
 ## 📄 License
-Licensed under **LGPL-3**.
+Licensed under the **MIT License**. See [`LICENSE`](file:///d:/Center/Github_Profile/Research-Supply-Chain/LICENSE) for details.

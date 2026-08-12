@@ -65,6 +65,17 @@ class ResearchRequirement(models.Model):
         string="Needed By",
     )
 
+    parent_id = fields.Many2one(
+        "research.requirement",
+        string="Parent Requirement",
+        ondelete="cascade",
+    )
+    child_ids = fields.One2many(
+        "research.requirement",
+        "parent_id",
+        string="Child Requirements",
+    )
+
     @api.constrains("quantity")
     def _check_quantity(self):
         for record in self:
@@ -76,3 +87,23 @@ class ResearchRequirement(models.Model):
         for record in self:
             if record.requested_date and record.needed_by and record.needed_by < record.requested_date:
                 raise ValidationError("Needed by date cannot be earlier than requested date.")
+
+    def calculate_recursive_total_quantity(self) -> float:
+        """
+        Demonstrates RECURSION:
+        Recursively calculates total quantity across nested requirement trees.
+        """
+        self.ensure_one()
+        # Base quantity of current node
+        total = self.quantity
+
+        # Base case / Terminating condition: No child requirements
+        if not self.child_ids:
+            return total
+
+        # Recursive Step: Call method recursively on each child requirement
+        for child in self.child_ids:
+            total += child.calculate_recursive_total_quantity()
+
+        return total
+
