@@ -82,10 +82,10 @@
                             </strong>
                         </div>
                         <div class="text-muted mb-1">
-                            <i class="fa fa-user me-1"/> <field name="paper_author"/>
+                            <i class="fa fa-user me-1" title="Author"/> <field name="paper_author"/>
                         </div>
                         <div class="text-muted small mb-2">
-                            <i class="fa fa-folder me-1"/> <field name="project_id"/>
+                            <i class="fa fa-folder me-1" title="Project"/> <field name="project_id"/>
                         </div>
                         <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
                             <div class="oe_kanban_bottom_left">

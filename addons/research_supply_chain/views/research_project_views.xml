@@ -225,4 +225,15 @@
         </field>
     </record>
 
+
+    <!-- ================================================================ -->
+    <!-- Override home action: admin lands on Research Projects, not Discuss -->
+    <!-- In Odoo 19, set action_id on res.users (home_action was removed    -->
+    <!-- from res.groups). Each user who should land on this app needs their -->
+    <!-- action_id set. Admin user is set here automatically.               -->
+    <!-- ================================================================ -->
+    <record id="base.user_admin" model="res.users">
+        <field name="action_id" ref="action_research_project"/>
+    </record>
+
 </odoo>

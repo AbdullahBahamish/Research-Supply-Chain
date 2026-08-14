@@ -95,7 +95,7 @@
                             </strong>
                         </div>
                         <div class="text-muted mb-2">
-                            <i class="fa fa-folder me-1"/> <field name="project_id"/>
+                            <i class="fa fa-folder me-1" title="Project"/> <field name="project_id"/>
                         </div>
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-info text-white me-2">
@@ -110,7 +110,7 @@
                                 <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'"/>
                             </div>
                             <div class="oe_kanban_bottom_right text-muted small" t-if="record.needed_by.raw_value">
-                                <i class="fa fa-clock-o me-1"/> Needed: <field name="needed_by"/>
+                                <i class="fa fa-clock-o me-1" title="Needed By"/> Needed: <field name="needed_by"/>
                             </div>
                         </div>
                     </t>

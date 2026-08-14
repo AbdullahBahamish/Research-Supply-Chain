@@ -76,12 +76,12 @@
                             </strong>
                         </div>
                         <div class="text-muted mb-2">
-                            <i class="fa fa-folder me-1"/> <field name="owner_project_id"/>
+                            <i class="fa fa-folder me-1" title="Project"/> <field name="owner_project_id"/>
                         </div>
                         <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
                             <div class="oe_kanban_bottom_left">
                                 <span class="badge bg-secondary">
-                                    <i class="fa fa-cube me-1"/> <field name="resource_type"/>
+                                    <i class="fa fa-cube me-1" title="Type"/> <field name="resource_type"/>
                                 </span>
                             </div>
                             <div class="oe_kanban_bottom_right">

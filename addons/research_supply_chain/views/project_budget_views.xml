@@ -72,7 +72,7 @@
                     <t t-name="card">
                         <div class="o_kanban_record_top mb-2">
                             <strong class="o_kanban_record_title text-primary fs-6">
-                                <i class="fa fa-money text-success me-1"/> <field name="project_id"/>
+                                <i class="fa fa-money text-success me-1" title="Budget"/> <field name="project_id"/>
                             </strong>
                         </div>
                         <div class="row g-2 mb-2 text-center">
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="o_kanban_record_bottom mt-2 pt-2 border-top text-muted small" t-if="record.start_date.raw_value">
-                            <i class="fa fa-calendar me-1"/> <field name="start_date"/> - <field name="end_date"/>
+                            <i class="fa fa-calendar me-1" title="Period"/> <field name="start_date"/> - <field name="end_date"/>
                         </div>
                     </t>
                 </templates>

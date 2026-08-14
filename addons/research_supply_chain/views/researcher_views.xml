@@ -75,19 +75,19 @@
                 <templates>
                     <t t-name="card">
                         <div class="d-flex align-items-center mb-2">
-                            <i class="fa fa-user-circle fa-2x text-secondary me-2"/>
+                            <i class="fa fa-user-circle fa-2x text-secondary me-2" title="Researcher"/>
                             <strong class="o_kanban_record_title text-primary fs-5">
                                 <field name="name"/>
                             </strong>
                         </div>
                         <div class="text-muted small">
-                            <i class="fa fa-briefcase me-1"/> <field name="position"/>
+                            <i class="fa fa-briefcase me-1" title="Position"/> <field name="position"/>
                         </div>
                         <div class="text-muted small">
-                            <i class="fa fa-envelope me-1"/> <field name="email"/>
+                            <i class="fa fa-envelope me-1" title="Email"/> <field name="email"/>
                         </div>
                         <div class="mt-2" t-if="record.is_principal.raw_value">
-                            <span class="badge bg-warning text-dark"><i class="fa fa-star me-1"/> Principal Investigator</span>
+                            <span class="badge bg-warning text-dark"><i class="fa fa-star me-1" title="Principal Investigator"/> Principal Investigator</span>
                         </div>
                     </t>
                 </templates>
