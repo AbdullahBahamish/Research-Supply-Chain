@@ -1,51 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Project Budget Form View -->
+    <record id="view_project_budget_form" model="ir.ui.view">
+        <field name="name">project.budget.form</field>
+        <field name="model">project.budget</field>
+        <field name="arch" type="xml">
+            <form string="Project Budget">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="project_id" placeholder="Select Research Project..."/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Budget Allocation">
+                            <field name="total_amount" widget="monetary"/>
+                            <field name="spent_amount" widget="monetary"/>
+                            <field name="remaining_amount" widget="monetary"/>
+                        </group>
+                        <group string="Accounting &amp; Schedule">
+                            <field name="analytic_account_id"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="System Audit Trail" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
+                            <field name="audit_notes" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <!-- Project Budget List View -->
     <record id="view_project_budget_list" model="ir.ui.view">
         <field name="name">project.budget.list</field>
         <field name="model">project.budget</field>
         <field name="arch" type="xml">
-            <list>
+            <list string="Project Budgets" multi_edit="1">
                 <field name="project_id"/>
-                <field name="currency_id"/>
-                <field name="total_amount"/>
-                <field name="spent_amount"/>
-                <field name="remaining_amount"/>
+                <field name="analytic_account_id"/>
+                <field name="total_amount" widget="monetary"/>
+                <field name="spent_amount" widget="monetary"/>
+                <field name="remaining_amount" widget="monetary"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
             </list>
         </field>
     </record>
 
-    <!-- Project Budget Form View -->
-    <record id="view_project_budget_form" model="ir.ui.view">
-        <field name="name">project.budget.form</field>
+    <!-- Project Budget Kanban View -->
+    <record id="view_project_budget_kanban" model="ir.ui.view">
+        <field name="name">project.budget.kanban</field>
         <field name="model">project.budget</field>
         <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="project_id"/>
-                            <field name="currency_id"/>
-                        </group>
-                        <group>
-                            <field name="start_date"/>
-                            <field name="end_date"/>
-                        </group>
-                    </group>
-                    <group string="Financial Breakdown">
-                        <group>
-                            <field name="total_amount"/>
-                            <field name="spent_amount"/>
-                        </group>
-                        <group>
-                            <field name="remaining_amount"/>
-                        </group>
-                    </group>
-                </sheet>
-            </form>
+            <kanban class="o_kanban_small_column">
+                <field name="project_id"/>
+                <field name="total_amount"/>
+                <field name="spent_amount"/>
+                <field name="remaining_amount"/>
+                <field name="currency_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_record_top mb-2">
+                            <strong class="o_kanban_record_title text-primary fs-6">
+                                <i class="fa fa-money text-success me-1"/> <field name="project_id"/>
+                            </strong>
+                        </div>
+                        <div class="row g-2 mb-2 text-center">
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block">Allocated</small>
+                                <strong class="text-dark"><field name="total_amount" widget="monetary"/></strong>
+                            </div>
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block">Spent</small>
+                                <strong class="text-danger"><field name="spent_amount" widget="monetary"/></strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Remaining</small>
+                                <strong class="text-success"><field name="remaining_amount" widget="monetary"/></strong>
+                            </div>
+                        </div>
+                        <div class="o_kanban_record_bottom mt-2 pt-2 border-top text-muted small" t-if="record.start_date.raw_value">
+                            <i class="fa fa-calendar me-1"/> <field name="start_date"/> - <field name="end_date"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Project Budget Pivot View (Financial Analytics - Managers & Admins) -->
+    <record id="view_project_budget_pivot" model="ir.ui.view">
+        <field name="name">project.budget.pivot</field>
+        <field name="model">project.budget</field>
+        <field name="arch" type="xml">
+            <pivot string="Budget Financial Analysis">
+                <field name="project_id" type="row"/>
+                <field name="total_amount" type="measure" operator="sum"/>
+                <field name="spent_amount" type="measure" operator="sum"/>
+                <field name="remaining_amount" type="measure" operator="sum"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Project Budget Graph View (Financial Analytics - Managers & Admins) -->
+    <record id="view_project_budget_graph" model="ir.ui.view">
+        <field name="name">project.budget.graph</field>
+        <field name="model">project.budget</field>
+        <field name="arch" type="xml">
+            <graph string="Project Budget Allocations" type="bar">
+                <field name="project_id" type="row"/>
+                <field name="total_amount" type="measure" operator="sum"/>
+                <field name="spent_amount" type="measure" operator="sum"/>
+            </graph>
         </field>
     </record>
 
@@ -53,7 +129,7 @@
     <record id="action_project_budget" model="ir.actions.act_window">
         <field name="name">Project Budgets</field>
         <field name="res_model">project.budget</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
     </record>
 
 </odoo>

@@ -13,6 +13,14 @@ class ProjectBudget(models.Model):
         required=True,
         ondelete="cascade",
     )
+    analytic_account_id = fields.Many2one(
+        "account.analytic.account",
+        string="Analytic Account",
+        related="project_id.analytic_account_id",
+        store=True,
+        readonly=False,
+        help="Linked Odoo Analytic Account for financial budget tracking.",
+    )
     currency_id = fields.Many2one(
         "res.currency",
         string="Currency",
@@ -34,6 +42,7 @@ class ProjectBudget(models.Model):
         string="Remaining Amount",
         currency_field="currency_id",
         compute="_compute_remaining_amount",
+        inverse="_inverse_remaining_amount",
         store=True,
     )
     start_date = fields.Date(
@@ -52,48 +61,90 @@ class ProjectBudget(models.Model):
                     ("id", "!=", record.id),
                 ])
                 if count > 0:
-                    raise ValidationError("A project can only have one budget record.")
+                    raise ValidationError(
+                        "❌ Duplicate Budget Record\n\n"
+                        f"Project '{record.project_id.project_name}' already has a budget assigned.\n"
+                        "Each project can only have one main budget record."
+                    )
 
     @api.depends("total_amount", "spent_amount")
     def _compute_remaining_amount(self):
         for record in self:
             record.remaining_amount = record.total_amount - record.spent_amount
 
+    def _inverse_remaining_amount(self):
+        for record in self:
+            record.total_amount = record.spent_amount + record.remaining_amount
+
     @api.constrains("total_amount", "spent_amount")
     def _check_amounts(self):
         for record in self:
             if record.total_amount < 0.0:
-                raise ValidationError("Total budget amount cannot be negative.")
+                raise ValidationError(
+                    "❌ Negative Budget Amount\n\n"
+                    "Total budget amount cannot be negative.\n"
+                    "Please enter a valid positive total budget."
+                )
             if record.spent_amount < 0.0:
-                raise ValidationError("Spent budget amount cannot be negative.")
+                raise ValidationError(
+                    "❌ Negative Spent Amount\n\n"
+                    "Spent budget amount cannot be negative.\n"
+                    "Please enter a valid spent amount."
+                )
 
     @api.constrains("start_date", "end_date")
     def _check_dates(self):
         for record in self:
             if record.start_date and record.end_date and record.end_date < record.start_date:
-                raise ValidationError("Budget end date cannot be earlier than start date.")
+                raise ValidationError(
+                    "❌ Invalid Budget Period\n\n"
+                    f"Budget end date ({record.end_date}) is earlier than start date ({record.start_date}).\n"
+                    "Please correct the budget dates."
+                )
 
-    # ------------------ Magic Methods & Operator Overloading ------------------
+    @api.onchange("spent_amount", "total_amount")
+    def _onchange_amounts(self):
+        if self.total_amount > 0.0 and self.spent_amount > self.total_amount:
+            return {
+                "warning": {
+                    "title": "Overbudget Warning",
+                    "message": f"Spent amount (${self.spent_amount:,.2f}) exceeds total allocated budget (${self.total_amount:,.2f}).",
+                }
+            }
+        elif self.total_amount > 0.0 and (self.spent_amount / self.total_amount) >= 0.90:
+            pct = (self.spent_amount / self.total_amount) * 100.0
+            return {
+                "warning": {
+                    "title": "High Utilization Warning",
+                    "message": f"Budget utilization has reached {pct:.1f}%.",
+                }
+            }
+
+    @api.onchange("project_id")
+    def _onchange_project_id(self):
+        if self.project_id:
+            if not self.start_date:
+                self.start_date = self.project_id.start_date
+            if not self.end_date:
+                self.end_date = self.project_id.end_date
+
+    # ------------------ Magic Methods & Domain Helpers ------------------
 
     def __str__(self) -> str:
-        """Magic Method: Friendly string formatting."""
-        return f"ProjectBudget(Project={self.project_id.project_name}, Total=${self.total_amount:,.2f})"
+        """Magic Method: Friendly string formatting for single record."""
+        if len(self) == 1:
+            return f"ProjectBudget(Project={self.project_id.project_name}, Total=${self.total_amount:,.2f})"
+        return super().__str__()
 
-    def __add__(self, other: "ProjectBudget") -> dict:
-        """Operator Overloading: Overloads '+' to calculate combined budget totals."""
-        if not isinstance(other, ProjectBudget):
-            return NotImplemented
+    def combine_budget(self, other: "ProjectBudget") -> dict:
+        """Helper method: Calculates combined budget totals with another budget record."""
+        self.ensure_one()
+        other.ensure_one()
         return {
             "combined_total": self.total_amount + other.total_amount,
             "combined_spent": self.spent_amount + other.spent_amount,
             "combined_remaining": self.remaining_amount + other.remaining_amount,
         }
-
-    def __eq__(self, other) -> bool:
-        """Operator Overloading: Overloads '==' to compare budget amounts."""
-        if not isinstance(other, ProjectBudget):
-            return False
-        return self.total_amount == other.total_amount
 
     def is_budget_positive(self) -> bool:
         """Domain Helper: Checks if remaining budget amount is positive (> 0.0)."""
@@ -109,9 +160,32 @@ class ProjectBudget(models.Model):
             percentage = (self.spent_amount / self.total_amount) * 100.0
         except ZeroDivisionError:
             percentage = 0.0
-        else:
-            pass  # Executed if no exception occurred
-        finally:
-            pass  # Always executed for cleanup
         return percentage
 
+    @api.model
+    def cron_check_budget_alerts(self):
+        """
+        Cron function: Periodically audits project budgets.
+        - Logs alerts for overbudget records (spent_amount > total_amount).
+        - Logs warnings for high budget utilization (>= 90%).
+        - Logs alerts for budgets whose end_date has expired.
+        """
+        today = fields.Date.context_today(self)
+        budgets = self.search([])
+        for budget in budgets:
+            utilization = budget.utilization_percentage
+            if budget.spent_amount > budget.total_amount:
+                budget._log_system_event(
+                    f"Cron Job Alert: Overbudget detected! Spent ${budget.spent_amount:,.2f} exceeding total ${budget.total_amount:,.2f} ({utilization:.1f}%)."
+                )
+            elif utilization >= 90.0:
+                budget._log_system_event(
+                    f"Cron Job Warning: High budget utilization detected ({utilization:.1f}% used of ${budget.total_amount:,.2f})."
+                )
+
+            if budget.end_date and budget.end_date < today:
+                budget._log_system_event(
+                    f"Cron Job Alert: Budget period expired on {budget.end_date}."
+                )
+
+        return True

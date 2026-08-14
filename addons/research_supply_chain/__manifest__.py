@@ -1,17 +1,22 @@
 {
     "name": "Research Supply Chain",
-    "version": "19.0.1.0.0",
+    "version": "19.0.2.0.0",
     "category": "Research",
-    "summary": "Manage the lifecycle of research projects, researchers, requirements, resources, experiments, budgets, and outputs.",
+    "summary": "Manage research projects, researchers, requirements, resources, experiments, budgets, and outputs.",
     "author": "Research Supply Chain Team",
     "website": "https://github.com/AbdullahBahamish/Research-Supply-Chain",
     "depends": [
         "base",
+        "mail",
+        "hr",
+        "product",
+        "analytic",
     ],
     "data": [
         "security/research_security.xml",
         "security/ir.model.access.csv",
         "data/research_supply_chain_data.xml",
+        "data/ir_cron_data.xml",
         "demo/research_supply_chain_demo.xml",
         "views/researcher_views.xml",
         "views/project_budget_views.xml",
@@ -29,5 +34,5 @@
     ],
     "installable": True,
     "application": True,
-    "license": "MIT",
+    "license": "LGPL-3",
 }

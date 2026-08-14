@@ -5,7 +5,6 @@
     <menuitem
         id="menu_research_supply_chain_root"
         name="Research Supply Chain"
-        action="action_research_project"
         web_icon="research_supply_chain,static/description/icon.png"
         sequence="10"
     />
@@ -91,12 +90,13 @@
         sequence="20"
     />
 
-    <!-- Finance Category -->
+    <!-- Finance Category (Restricted to Research Managers and Administrators) -->
     <menuitem
         id="menu_finance"
         name="Finance"
         parent="menu_research_supply_chain_root"
         sequence="50"
+        groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
     />
     <menuitem
         id="menu_project_budget"
@@ -104,14 +104,16 @@
         parent="menu_finance"
         action="action_project_budget"
         sequence="10"
+        groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
     />
 
-    <!-- Tools Category -->
+    <!-- Tools Category (Restricted to Administrator) -->
     <menuitem
         id="menu_tools"
         name="Tools"
         parent="menu_research_supply_chain_root"
         sequence="60"
+        groups="research_supply_chain.group_research_admin"
     />
     <menuitem
         id="menu_generate_sample_data"
@@ -119,6 +121,7 @@
         parent="menu_tools"
         action="action_research_sample_data_wizard"
         sequence="10"
+        groups="research_supply_chain.group_research_admin"
     />
 
 </odoo>

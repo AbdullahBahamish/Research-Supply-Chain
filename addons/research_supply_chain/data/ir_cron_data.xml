@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Cron: Update Research Project Statuses -->
+        <record id="ir_cron_update_project_statuses" model="ir.cron">
+            <field name="name">Research Project: Update Statuses Based on Dates</field>
+            <field name="model_id" ref="model_research_project"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_update_project_statuses()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron: Check Project Budget Alerts -->
+        <record id="ir_cron_check_budget_alerts" model="ir.cron">
+            <field name="name">Project Budget: Check Utilization and Expiration Alerts</field>
+            <field name="model_id" ref="model_project_budget"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_check_budget_alerts()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron: Check Overdue Requirements -->
+        <record id="ir_cron_check_overdue_requirements" model="ir.cron">
+            <field name="name">Research Requirement: Check Overdue Requirements</field>
+            <field name="model_id" ref="model_research_requirement"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_check_overdue_requirements()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron: Update Experiment Statuses -->
+        <record id="ir_cron_update_experiment_statuses" model="ir.cron">
+            <field name="name">Research Experiment: Update Statuses Based on Dates</field>
+            <field name="model_id" ref="model_research_experiment"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_update_experiment_statuses()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron: Check Research Paper Statuses -->
+        <record id="ir_cron_check_paper_statuses" model="ir.cron">
+            <field name="name">Research Paper: Check Publication Review Reminders</field>
+            <field name="model_id" ref="model_research_paper"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_check_paper_statuses()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

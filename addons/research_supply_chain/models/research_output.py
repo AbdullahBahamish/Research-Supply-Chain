@@ -1,4 +1,5 @@
-from odoo import models, fields  # type: ignore  # pyfly: ignore [missing-import]
+from odoo import models, fields, api  # type: ignore  # pyfly: ignore [missing-import]
+from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
 
 class ResearchOutput(models.Model):
     _name = "research.output"
@@ -16,7 +17,7 @@ class ResearchOutput(models.Model):
         string="Project",
         related="experiment_id.project_id",
         store=True,
-        readonly=True,
+        readonly=False,
     )
     output_type = fields.Selection(
         [
@@ -35,6 +36,9 @@ class ResearchOutput(models.Model):
         string="Title",
         required=True,
     )
+    description = fields.Text(
+        string="Description",
+    )
     status = fields.Selection(
         [
             ("draft", "Draft"),
@@ -46,3 +50,31 @@ class ResearchOutput(models.Model):
         default="draft",
         required=True,
     )
+
+    # ─── Validation Constraints ───────────────────────────────────────────────
+
+    @api.constrains("name")
+    def _check_name_length(self):
+        for record in self:
+            if len((record.name or "").strip()) < 3:
+                raise ValidationError(
+                    "❌ Output Title Too Short\n\n"
+                    "Research output title must be at least 3 characters long.\n"
+                    "Please provide a complete title."
+                )
+
+    @api.constrains("name", "experiment_id")
+    def _check_unique_output_per_experiment(self):
+        for record in self:
+            if record.name and record.experiment_id:
+                count = self.search_count([
+                    ("name", "=", record.name.strip()),
+                    ("experiment_id", "=", record.experiment_id.id),
+                    ("id", "!=", record.id),
+                ])
+                if count > 0:
+                    raise ValidationError(
+                        "❌ Duplicate Output Title\n\n"
+                        f"An output named '{record.name}' already exists in experiment '{record.experiment_id.name}'.\n"
+                        "Please use a unique output title."
+                    )

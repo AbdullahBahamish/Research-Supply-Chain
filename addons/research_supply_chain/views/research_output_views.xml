@@ -1,45 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Research Output List View -->
-    <record id="view_research_output_list" model="ir.ui.view">
-        <field name="name">research.output.list</field>
-        <field name="model">research.output</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-                <field name="output_type"/>
-                <field name="experiment_id"/>
-                <field name="project_id"/>
-                <field name="status"/>
-                <field name="create_date"/>
-            </list>
-        </field>
-    </record>
-
     <!-- Research Output Form View -->
     <record id="view_research_output_form" model="ir.ui.view">
         <field name="name">research.output.form</field>
         <field name="model">research.output</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Research Output">
                 <header>
                     <field name="status" widget="statusbar" statusbar_visible="draft,under_review,accepted,published"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Published" bg_color="bg-success" invisible="status != 'published'"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Qubit Control Pulse Benchmark Dataset v1.0"/>
+                        </h1>
+                    </div>
+
                     <group>
-                        <group>
-                            <field name="name"/>
+                        <group string="Classification">
                             <field name="output_type"/>
-                        </group>
-                        <group>
-                            <field name="experiment_id"/>
-                            <field name="project_id"/>
-                            <field name="create_date" string="Created At"/>
+                            <field name="experiment_id" options="{'no_create': True}"/>
+                            <field name="project_id" options="{'no_create': True}"/>
                         </group>
                     </group>
+
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Output details, data repository links, access instructions..."/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <!-- Research Output List View -->
+    <record id="view_research_output_list" model="ir.ui.view">
+        <field name="name">research.output.list</field>
+        <field name="model">research.output</field>
+        <field name="arch" type="xml">
+            <list string="Research Outputs" multi_edit="1">
+                <field name="name"/>
+                <field name="output_type"/>
+                <field name="experiment_id"/>
+                <field name="project_id"/>
+                <field name="status" widget="badge" decoration-muted="status == 'draft'" decoration-warning="status == 'under_review'" decoration-info="status == 'accepted'" decoration-success="status == 'published'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Research Output Kanban View -->
+    <record id="view_research_output_kanban" model="ir.ui.view">
+        <field name="name">research.output.kanban</field>
+        <field name="model">research.output</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="output_type"/>
+                <field name="status"/>
+                <field name="experiment_id"/>
+                <field name="project_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_record_top mb-1">
+                            <strong class="o_kanban_record_title text-primary">
+                                <field name="name"/>
+                            </strong>
+                        </div>
+                        <div class="text-muted small mb-1" t-if="record.experiment_id.raw_value">
+                            <i class="fa fa-flask me-1"/> <field name="experiment_id"/>
+                        </div>
+                        <div class="text-muted small mb-2">
+                            <i class="fa fa-folder me-1"/> <field name="project_id"/>
+                        </div>
+                        <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
+                            <div class="oe_kanban_bottom_left">
+                                <span class="badge bg-info text-white">
+                                    <field name="output_type"/>
+                                </span>
+                            </div>
+                            <div class="oe_kanban_bottom_right">
+                                <field name="status" widget="badge" decoration-muted="status == 'draft'" decoration-warning="status == 'under_review'" decoration-success="status == 'published'"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
@@ -47,7 +96,7 @@
     <record id="action_research_output" model="ir.actions.act_window">
         <field name="name">Research Outputs</field>
         <field name="res_model">research.output</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
     </record>
 
 </odoo>

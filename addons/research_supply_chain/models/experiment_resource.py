@@ -25,6 +25,8 @@ class ExperimentResource(models.Model):
         default=1.0,
     )
 
+    # ─── Validation Constraints ───────────────────────────────────────────────
+
     @api.constrains("experiment_id", "resource_id")
     def _check_experiment_resource_unique(self):
         for record in self:
@@ -35,10 +37,18 @@ class ExperimentResource(models.Model):
                     ("id", "!=", record.id),
                 ])
                 if count > 0:
-                    raise ValidationError("A resource can only be assigned once per experiment.")
+                    raise ValidationError(
+                        "❌ Duplicate Resource Assignment\n\n"
+                        f"Resource '{record.resource_id.name}' is already assigned to experiment '{record.experiment_id.name}'.\n"
+                        "Each resource can only be assigned once per experiment."
+                    )
 
     @api.constrains("quantity")
     def _check_quantity(self):
         for record in self:
             if record.quantity <= 0.0:
-                raise ValidationError("Resource quantity assigned to an experiment must be greater than zero.")
+                raise ValidationError(
+                    "❌ Invalid Quantity\n\n"
+                    f"Resource quantity assigned ({record.quantity}) must be greater than zero.\n"
+                    "Please enter a valid quantity."
+                )

@@ -29,6 +29,12 @@ class ResearchRequirement(models.Model):
         string="Requirement Name",
         required=True,
     )
+    product_id = fields.Many2one(
+        "product.product",
+        string="Catalog Product",
+        ondelete="set null",
+        help="Linked standard Odoo product item for procurement.",
+    )
     description = fields.Text(
         string="Description",
     )
@@ -76,17 +82,56 @@ class ResearchRequirement(models.Model):
         string="Child Requirements",
     )
 
+    # ─── Validation Constraints ───────────────────────────────────────────────
+
     @api.constrains("quantity")
     def _check_quantity(self):
         for record in self:
             if record.quantity <= 0.0:
-                raise ValidationError("Requirement quantity must be greater than zero.")
+                raise ValidationError(
+                    "❌ Invalid Requirement Quantity\n\n"
+                    f"Requirement '{record.name}' has quantity {record.quantity}.\n"
+                    "Quantity must be greater than zero."
+                )
 
     @api.constrains("requested_date", "needed_by")
     def _check_dates(self):
         for record in self:
             if record.requested_date and record.needed_by and record.needed_by < record.requested_date:
-                raise ValidationError("Needed by date cannot be earlier than requested date.")
+                raise ValidationError(
+                    "❌ Invalid Requirement Schedule\n\n"
+                    f"Requirement '{record.name}' has 'Needed By' date ({record.needed_by}) "
+                    f"earlier than 'Requested Date' ({record.requested_date}).\n"
+                    "Please adjust the schedule."
+                )
+
+    @api.constrains("parent_id")
+    def _check_recursion(self):
+        for record in self:
+            if not record._check_recursion():
+                raise ValidationError(
+                    "❌ Circular Parent Requirement\n\n"
+                    f"Requirement '{record.name}' cannot be its own parent or cause a circular hierarchy loop.\n"
+                    "Please select a valid parent requirement."
+                )
+
+    @api.constrains("name")
+    def _check_name_length(self):
+        for record in self:
+            if len((record.name or "").strip()) < 3:
+                raise ValidationError(
+                    "❌ Requirement Name Too Short\n\n"
+                    "Requirement name must be at least 3 characters long."
+                )
+
+    @api.onchange("category")
+    def _onchange_category(self):
+        if self.category == "hardware":
+            self.priority = "high"
+        elif self.category in ["service", "expertise"]:
+            self.priority = "medium"
+        elif self.category in ["dataset", "software", "other"]:
+            self.priority = "low"
 
     def calculate_recursive_total_quantity(self) -> float:
         """
@@ -94,16 +139,29 @@ class ResearchRequirement(models.Model):
         Recursively calculates total quantity across nested requirement trees.
         """
         self.ensure_one()
-        # Base quantity of current node
         total = self.quantity
-
-        # Base case / Terminating condition: No child requirements
         if not self.child_ids:
             return total
 
-        # Recursive Step: Call method recursively on each child requirement
         for child in self.child_ids:
             total += child.calculate_recursive_total_quantity()
 
         return total
 
+    @api.model
+    def cron_check_overdue_requirements(self):
+        """
+        Cron function: Identifies pending requirements whose 'needed_by' date has passed.
+        - Escalates priority of overdue requested or approved requirements to 'high'.
+        """
+        today = fields.Date.context_today(self)
+        overdue_reqs = self.search([
+            ("status", "in", ["requested", "approved"]),
+            ("needed_by", "!=", False),
+            ("needed_by", "<", today),
+        ])
+        for req in overdue_reqs:
+            if req.priority != "high":
+                req.priority = "high"
+
+        return True

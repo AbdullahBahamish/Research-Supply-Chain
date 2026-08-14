@@ -1,49 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Experiment List View -->
-    <record id="view_experiment_list" model="ir.ui.view">
-        <field name="name">research.experiment.list</field>
-        <field name="model">research.experiment</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-                <field name="project_id"/>
-                <field name="status"/>
-                <field name="start_date"/>
-                <field name="end_date"/>
-                <field name="created_by"/>
-            </list>
-        </field>
-    </record>
-
     <!-- Experiment Form View -->
     <record id="view_experiment_form" model="ir.ui.view">
         <field name="name">research.experiment.form</field>
         <field name="model">research.experiment</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Research Experiment">
                 <header>
                     <field name="status" widget="statusbar" statusbar_visible="planned,running,completed,cancelled"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Completed" bg_color="bg-success" invisible="status != 'completed'"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="bg-danger" invisible="status != 'cancelled'"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Experiment #101: Superconducting Qubit Coherence Test"/>
+                        </h1>
+                    </div>
+
                     <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="project_id"/>
-                            <field name="created_by"/>
+                        <group string="General Information">
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="created_by" options="{'no_create': True}"/>
                         </group>
-                        <group>
+                        <group string="Schedule">
                             <field name="start_date"/>
                             <field name="end_date"/>
                         </group>
                     </group>
+
                     <notebook>
-                        <page string="Objective">
-                            <field name="objective"/>
-                        </page>
-                        <page string="Methodology">
-                            <field name="methodology"/>
+                        <page string="Objective &amp; Methodology">
+                            <group>
+                                <field name="objective" placeholder="Primary hypothesis and scientific goals..."/>
+                                <field name="methodology" placeholder="Detailed experimental procedures, control parameters, and test protocols..."/>
+                            </group>
                         </page>
                         <page string="Used Resources">
                             <field name="experiment_resource_ids">
@@ -54,19 +47,106 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Outputs">
+                        <page string="Produced Outputs">
                             <field name="output_ids">
-                                <list>
+                                <list editable="bottom">
                                     <field name="name"/>
                                     <field name="output_type"/>
                                     <field name="status"/>
-                                    <field name="create_date"/>
                                 </list>
                             </field>
                         </page>
                     </notebook>
                 </sheet>
+
+                <!-- Standard Odoo Chatter -->
+                <chatter/>
             </form>
+        </field>
+    </record>
+
+    <!-- Experiment List View -->
+    <record id="view_experiment_list" model="ir.ui.view">
+        <field name="name">research.experiment.list</field>
+        <field name="model">research.experiment</field>
+        <field name="arch" type="xml">
+            <list string="Experiments" multi_edit="1">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="created_by"/>
+                <field name="status" widget="badge" decoration-info="status == 'planned'" decoration-warning="status == 'running'" decoration-success="status == 'completed'" decoration-danger="status == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Experiment Kanban View -->
+    <record id="view_experiment_kanban" model="ir.ui.view">
+        <field name="name">research.experiment.kanban</field>
+        <field name="model">research.experiment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="status"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="created_by"/>
+                <field name="resource_count"/>
+                <field name="output_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_record_top mb-1">
+                            <strong class="o_kanban_record_title text-primary">
+                                <field name="name"/>
+                            </strong>
+                        </div>
+                        <div class="text-muted mb-2">
+                            <i class="fa fa-folder me-1" title="Project"/> <field name="project_id"/>
+                        </div>
+                        <div class="text-muted small mb-2" t-if="record.start_date.raw_value">
+                            <i class="fa fa-calendar me-1" title="Schedule"/> <field name="start_date"/> - <field name="end_date"/>
+                        </div>
+                        <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
+                            <div class="oe_kanban_bottom_left">
+                                <span class="badge rounded-pill bg-light text-dark border me-1" title="Resources Used">
+                                    <i class="fa fa-cubes text-warning me-1"/> <t t-esc="record.resource_count.raw_value"/>
+                                </span>
+                                <span class="badge rounded-pill bg-light text-dark border" title="Outputs Produced">
+                                    <i class="fa fa-file-text-o text-success me-1"/> <t t-esc="record.output_count.raw_value"/>
+                                </span>
+                            </div>
+                            <div class="oe_kanban_bottom_right">
+                                <field name="created_by" widget="many2one_avatar_user"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Experiment Pivot View (Leads, Managers, Owners, Admins) -->
+    <record id="view_experiment_pivot" model="ir.ui.view">
+        <field name="name">research.experiment.pivot</field>
+        <field name="model">research.experiment</field>
+        <field name="arch" type="xml">
+            <pivot string="Experiments Analysis">
+                <field name="project_id" type="row"/>
+                <field name="status" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Experiment Graph View (Leads, Managers, Owners, Admins) -->
+    <record id="view_experiment_graph" model="ir.ui.view">
+        <field name="name">research.experiment.graph</field>
+        <field name="model">research.experiment</field>
+        <field name="arch" type="xml">
+            <graph string="Experiments Status Breakdown" type="bar">
+                <field name="status" type="row"/>
+            </graph>
         </field>
     </record>
 
@@ -74,7 +154,7 @@
     <record id="action_experiment" model="ir.actions.act_window">
         <field name="name">Experiments</field>
         <field name="res_model">research.experiment</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
     </record>
 
 </odoo>

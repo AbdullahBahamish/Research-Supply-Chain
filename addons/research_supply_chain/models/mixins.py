@@ -2,12 +2,14 @@ import functools
 import itertools
 import re
 import time
+import logging
 from odoo import models, fields, api  # type: ignore  # pyfly: ignore [missing-import]
 from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
 
 # ==============================================================================
 # DECORATORS
 # ==============================================================================
+_logger = logging.getLogger(__name__)
 
 def system_audit_log(action_name: str):
     """Custom decorator for logging method execution in system models."""
@@ -15,12 +17,31 @@ def system_audit_log(action_name: str):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             start_t = time.perf_counter()
-            res = func(self, *args, **kwargs)
-            elapsed_ms = (time.perf_counter() - start_t) * 1000
-            # Record log internally if model supports logging
-            if hasattr(self, '_log_system_event'):
-                self._log_system_event(f"Action '{action_name}' completed in {elapsed_ms:.2f}ms")
-            return res
+            try:
+                res = func(self, *args, **kwargs)
+                elapsed_ms = (time.perf_counter() - start_t) * 1000
+
+                target = res if (res and isinstance(res, models.Model)) else self
+                target_ids = getattr(target, 'ids', [])
+                log_msg = f"Action '{action_name}' executed on {target._name} (IDs: {target_ids}) in {elapsed_ms:.2f}ms"
+
+                if hasattr(target, '_log_system_event'):
+                    try:
+                        target._log_system_event(log_msg)
+                    except Exception as log_err:
+                        _logger.warning(f"Failed to record internal audit log: {log_err}")
+                else:
+                    _logger.info(log_msg)
+
+                return res
+
+            except Exception as e:
+                elapsed_ms = (time.perf_counter() - start_t) * 1000
+                _logger.error(
+                    f"Action '{action_name}' FAILED on {self._name} (IDs: {self.ids}) after {elapsed_ms:.2f}ms. Error: {e}"
+                )
+                raise
+
         return wrapper
     return decorator
 

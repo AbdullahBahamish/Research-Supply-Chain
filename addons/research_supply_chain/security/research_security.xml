@@ -1,22 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Module Category -->
     <record id="module_category_research_supply_chain" model="ir.module.category">
         <field name="name">Research Supply Chain</field>
         <field name="description">Manage research projects, resources, requirements, experiments, and outputs.</field>
         <field name="sequence">15</field>
     </record>
 
+    <!-- 1. User Group (Read-Only Public Viewer) -->
     <record id="group_research_user" model="res.groups">
-        <field name="name">Research Supply Chain / User</field>
+        <field name="name">Research Supply Chain / User (Viewer)</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
+    <!-- 2. Researcher Group -->
+    <record id="group_researcher" model="res.groups">
+        <field name="name">Research Supply Chain / Researcher</field>
+        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- 3. Project Lead / PI Group -->
+    <record id="group_research_lead" model="res.groups">
+        <field name="name">Research Supply Chain / Project Lead</field>
+        <field name="implied_ids" eval="[(4, ref('group_researcher'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- 4. Research Manager Group (Finance & Project CRUD) -->
     <record id="group_research_manager" model="res.groups">
-        <field name="name">Research Supply Chain / Manager</field>
-        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+        <field name="name">Research Supply Chain / Research Manager</field>
+        <field name="implied_ids" eval="[(4, ref('group_research_lead'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
-    <record id="base.group_user" model="res.groups">
-        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+    <!-- 5. Administrator Group (Full System Admin) -->
+    <record id="group_research_admin" model="res.groups">
+        <field name="name">Research Supply Chain / Administrator</field>
+        <field name="implied_ids" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- ==================================================================== -->
+    <!-- RECORD RULES (Public vs Private Project Privacy Control)            -->
+    <!-- ==================================================================== -->
+
+    <!-- Rule: Standard Users & Researchers see Public Projects or projects where they are team members -->
+    <record id="rule_research_project_public_private_user" model="ir.rule">
+        <field name="name">Research Project: Public or Team Visibility</field>
+        <field name="model_id" ref="model_research_project"/>
+        <field name="groups" eval="[(4, ref('group_research_user')), (4, ref('group_researcher'))]"/>
+        <field name="domain_force">['|', ('visibility', '=', 'public'), '|', ('lead_researcher_id.user_id', '=', user.id), ('researcher_line_ids.researcher_id.user_id', '=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Rule: Project Leads see Public Projects or projects they lead/participate in -->
+    <record id="rule_research_project_lead" model="ir.rule">
+        <field name="name">Research Project: Project Lead Access</field>
+        <field name="model_id" ref="model_research_project"/>
+        <field name="groups" eval="[(4, ref('group_research_lead'))]"/>
+        <field name="domain_force">['|', ('visibility', '=', 'public'), '|', ('lead_researcher_id.user_id', '=', user.id), ('researcher_line_ids.researcher_id.user_id', '=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Rule: Research Managers & Admins have Global Access across all Public & Private projects -->
+    <record id="rule_research_project_manager_global" model="ir.rule">
+        <field name="name">Research Project: Manager Global Access</field>
+        <field name="model_id" ref="model_research_project"/>
+        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
     </record>
 </odoo>

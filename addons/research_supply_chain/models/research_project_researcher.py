@@ -29,6 +29,8 @@ class ResearchProjectResearcher(models.Model):
         default=fields.Date.context_today,
     )
 
+    # ─── Validation Constraints ───────────────────────────────────────────────
+
     @api.constrains("project_id", "researcher_id")
     def _check_project_researcher_unique(self):
         for record in self:
@@ -39,12 +41,18 @@ class ResearchProjectResearcher(models.Model):
                     ("id", "!=", record.id),
                 ])
                 if count > 0:
-                    raise ValidationError("A researcher can only be added once per project.")
+                    raise ValidationError(
+                        "❌ Duplicate Team Member\n\n"
+                        f"Researcher '{record.researcher_id.name}' is already assigned to project '{record.project_id.project_name}'.\n"
+                        "Each researcher can only be added once per project team."
+                    )
 
     @api.constrains("allocated_pct")
     def _check_allocated_pct(self):
         for record in self:
             if record.allocated_pct < 0.0 or record.allocated_pct > 100.0:
                 raise ValidationError(
-                    "Researcher allocation percentage must be between 0% and 100%."
+                    "❌ Invalid Allocation Percentage\n\n"
+                    f"Allocation percentage ({record.allocated_pct}%) must be between 0% and 100%.\n"
+                    "Please enter a valid percentage."
                 )

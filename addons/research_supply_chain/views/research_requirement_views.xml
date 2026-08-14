@@ -1,49 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Research Requirement List View -->
-    <record id="view_research_requirement_list" model="ir.ui.view">
-        <field name="name">research.requirement.list</field>
-        <field name="model">research.requirement</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-                <field name="project_id"/>
-                <field name="category"/>
-                <field name="quantity"/>
-                <field name="priority"/>
-                <field name="status"/>
-                <field name="needed_by"/>
-            </list>
-        </field>
-    </record>
-
     <!-- Research Requirement Form View -->
     <record id="view_research_requirement_form" model="ir.ui.view">
         <field name="name">research.requirement.form</field>
         <field name="model">research.requirement</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Research Requirement">
                 <header>
                     <field name="status" widget="statusbar" statusbar_visible="requested,approved,fulfilled,cancelled"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Fulfilled" bg_color="bg-success" invisible="status != 'fulfilled'"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="bg-secondary" invisible="status != 'cancelled'"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. High-Performance GPU Cluster Allocation"/>
+                        </h1>
+                    </div>
+
                     <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="project_id"/>
+                        <group string="Classification &amp; Quantity">
                             <field name="category"/>
+                            <field name="product_id" options="{'no_create': True}"/>
                             <field name="quantity"/>
+                            <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'"/>
                         </group>
-                        <group>
-                            <field name="priority"/>
+                        <group string="Project &amp; Schedule">
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="parent_id" domain="[('project_id', '=', project_id)]"/>
                             <field name="requested_date"/>
                             <field name="needed_by"/>
                         </group>
                     </group>
+
                     <notebook>
                         <page string="Description">
-                            <field name="description"/>
+                            <field name="description" placeholder="Technical specifications, requirements details, and fulfillment guidelines..."/>
+                        </page>
+                        <page string="Child Requirements">
+                            <field name="child_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                    <field name="quantity"/>
+                                    <field name="priority" widget="badge"/>
+                                    <field name="status" widget="badge"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
@@ -51,11 +56,99 @@
         </field>
     </record>
 
+    <!-- Research Requirement List View -->
+    <record id="view_research_requirement_list" model="ir.ui.view">
+        <field name="name">research.requirement.list</field>
+        <field name="model">research.requirement</field>
+        <field name="arch" type="xml">
+            <list string="Research Requirements" multi_edit="1">
+                <field name="name"/>
+                <field name="category"/>
+                <field name="product_id"/>
+                <field name="project_id"/>
+                <field name="quantity"/>
+                <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'"/>
+                <field name="status" widget="badge" decoration-info="status == 'requested'" decoration-warning="status == 'approved'" decoration-success="status == 'fulfilled'" decoration-muted="status == 'cancelled'"/>
+                <field name="needed_by"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Research Requirement Kanban View -->
+    <record id="view_research_requirement_kanban" model="ir.ui.view">
+        <field name="name">research.requirement.kanban</field>
+        <field name="model">research.requirement</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="category"/>
+                <field name="quantity"/>
+                <field name="priority"/>
+                <field name="status"/>
+                <field name="needed_by"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_record_top mb-1">
+                            <strong class="o_kanban_record_title text-primary">
+                                <field name="name"/>
+                            </strong>
+                        </div>
+                        <div class="text-muted mb-2">
+                            <i class="fa fa-folder me-1"/> <field name="project_id"/>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-info text-white me-2">
+                                <field name="category"/>
+                            </span>
+                            <span class="text-muted small">
+                                Qty: <strong><field name="quantity"/></strong>
+                            </span>
+                        </div>
+                        <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
+                            <div class="oe_kanban_bottom_left">
+                                <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'"/>
+                            </div>
+                            <div class="oe_kanban_bottom_right text-muted small" t-if="record.needed_by.raw_value">
+                                <i class="fa fa-clock-o me-1"/> Needed: <field name="needed_by"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Research Requirement Pivot View (Leads, Managers, Owners, Admins) -->
+    <record id="view_research_requirement_pivot" model="ir.ui.view">
+        <field name="name">research.requirement.pivot</field>
+        <field name="model">research.requirement</field>
+        <field name="arch" type="xml">
+            <pivot string="Requirements Analysis">
+                <field name="project_id" type="row"/>
+                <field name="category" type="col"/>
+                <field name="quantity" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Research Requirement Graph View (Leads, Managers, Owners, Admins) -->
+    <record id="view_research_requirement_graph" model="ir.ui.view">
+        <field name="name">research.requirement.graph</field>
+        <field name="model">research.requirement</field>
+        <field name="arch" type="xml">
+            <graph string="Requirements Quantity by Category" type="bar">
+                <field name="category" type="row"/>
+                <field name="quantity" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
     <!-- Research Requirement Action -->
     <record id="action_research_requirement" model="ir.actions.act_window">
         <field name="name">Research Requirements</field>
         <field name="res_model">research.requirement</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
     </record>
 
 </odoo>
