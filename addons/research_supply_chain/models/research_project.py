@@ -159,33 +159,26 @@ class ResearchProject(models.Model):
         aggregator="sum",
     )
 
-    _sql_constraints = [
-        models.Constraint(
-            "code_unique",
-            "UNIQUE(code)",
-            "Project code must be unique across all projects.",
-        ),
-        models.Constraint(
-            "check_dates_valid",
-            "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
-            "Project end date must be on or after the start date.",
-        ),
-        models.Constraint(
-            "check_project_name_length",
-            "CHECK(LENGTH(TRIM(project_name)) >= 5)",
-            "Project title must be at least 5 characters long.",
-        ),
-        models.Constraint(
-            "check_status_requires_start_date",
-            "CHECK(project_status NOT IN ('in_progress', 'completed') OR start_date IS NOT NULL)",
-            "Project status requires a start date.",
-        ),
-        models.Constraint(
-            "check_completed_requires_end_date",
-            "CHECK(project_status != 'completed' OR end_date IS NOT NULL)",
-            "Completed projects must have an end date.",
-        ),
-    ]
+    _code_unique = models.Constraint(
+        "UNIQUE(code)",
+        "Project code must be unique across all projects.",
+    )
+    _check_dates_valid = models.Constraint(
+        "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
+        "Project end date must be on or after the start date.",
+    )
+    _check_project_name_length = models.Constraint(
+        "CHECK(LENGTH(TRIM(project_name)) >= 5)",
+        "Project title must be at least 5 characters long.",
+    )
+    _check_status_requires_start_date = models.Constraint(
+        "CHECK(project_status NOT IN ('in_progress', 'completed') OR start_date IS NOT NULL)",
+        "Project status requires a start date.",
+    )
+    _check_completed_requires_end_date = models.Constraint(
+        "CHECK(project_status != 'completed' OR end_date IS NOT NULL)",
+        "Completed projects must have an end date.",
+    )
 
     @api.depends("budget_ids.total_amount", "budget_ids.spent_amount", "budget_ids.remaining_amount")
     def _compute_budget_totals(self):

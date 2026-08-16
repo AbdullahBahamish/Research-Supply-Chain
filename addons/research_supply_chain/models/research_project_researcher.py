@@ -31,18 +31,14 @@ class ResearchProjectResearcher(models.Model):
     )
 
     # ─── Validation Constraints ───────────────────────────────────────────────
-    _sql_constraints = [
-        models.Constraint(
-            "project_researcher_unique",
-            "UNIQUE(project_id, researcher_id)",
-            "Researcher is already assigned to this project. Each researcher can only be added once per project team.",
-        ),
-        models.Constraint(
-            "check_allocated_pct_range",
-            "CHECK(allocated_pct >= 0.0 AND allocated_pct <= 100.0)",
-            "Allocation percentage must be between 0% and 100%.",
-        ),
-    ]
+    _project_researcher_unique = models.Constraint(
+        "UNIQUE(project_id, researcher_id)",
+        "Researcher is already assigned to this project. Each researcher can only be added once per project team.",
+    )
+    _check_allocated_pct_range = models.Constraint(
+        "CHECK(allocated_pct >= 0.0 AND allocated_pct <= 100.0)",
+        "Allocation percentage must be between 0% and 100%.",
+    )
 
     # @api.constrains("project_id", "researcher_id")
     # def _check_project_researcher_unique(self):

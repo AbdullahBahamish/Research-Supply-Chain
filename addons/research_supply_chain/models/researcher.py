@@ -65,18 +65,14 @@ class Researcher(models.Model):
         string="Project Allocations",
     )
 
-    _sql_constraints = [
-        models.Constraint(
-            "user_unique",
-            "UNIQUE(user_id)",
-            "A researcher profile already exists for this user account.",
-        ),
-        models.Constraint(
-            "check_position_length",
-            "CHECK(position IS NULL OR LENGTH(TRIM(position)) >= 2)",
-            "Job position must be at least 2 characters long.",
-        ),
-    ]
+    _user_unique = models.Constraint(
+        "UNIQUE(user_id)",
+        "A researcher profile already exists for this user account.",
+    )
+    _check_position_length = models.Constraint(
+        "CHECK(position IS NULL OR LENGTH(TRIM(position)) >= 2)",
+        "Job position must be at least 2 characters long.",
+    )
 
     @api.constrains("email")
     def _check_email_format(self):

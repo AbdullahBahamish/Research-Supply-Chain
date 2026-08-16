@@ -101,23 +101,18 @@ class ResearchRequirement(models.Model):
         string="Child Requirements",
     )
 
-    _sql_constraints = [
-        models.Constraint(
-            "check_positive_quantity",
-            "CHECK(quantity > 0)",
-            "Quantity must be strictly greater than zero.",
-        ),
-        models.Constraint(
-            "check_dates_chronology",
-            "CHECK(requested_date IS NULL OR needed_by IS NULL OR needed_by >= requested_date)",
-            "The 'Needed By' date must be on or after the 'Requested Date'.",
-        ),
-        models.Constraint(
-            "check_name_min_length",
-            "CHECK(LENGTH(TRIM(name)) >= 3)",
-            "Requirement name must be at least 3 characters long.",
-        ),
-    ]
+    _check_positive_quantity = models.Constraint(
+        "CHECK(quantity > 0)",
+        "Quantity must be strictly greater than zero.",
+    )
+    _check_dates_chronology = models.Constraint(
+        "CHECK(requested_date IS NULL OR needed_by IS NULL OR needed_by >= requested_date)",
+        "The 'Needed By' date must be on or after the 'Requested Date'.",
+    )
+    _check_name_min_length = models.Constraint(
+        "CHECK(LENGTH(TRIM(name)) >= 3)",
+        "Requirement name must be at least 3 characters long.",
+    )
 
     @api.constrains("parent_id")
     def _check_parent_recursion(self):

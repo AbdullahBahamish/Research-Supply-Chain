@@ -63,23 +63,18 @@ class ProjectBudget(models.Model):
         for record in self:
             record.total_amount = record.spent_amount + record.remaining_amount
 
-    _sql_constraints = [
-        models.Constraint(
-            "project_budget_unique",
-            "UNIQUE(project_id)",
-            "Each project can only have one main budget record.",
-        ),
-        models.Constraint(
-            "check_amounts_positive",
-            "CHECK(total_amount >= 0.0 AND spent_amount >= 0.0)",
-            "Total and spent budget amounts cannot be negative.",
-        ),
-        models.Constraint(
-            "check_dates_valid",
-            "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
-            "Budget end date must be on or after the start date.",
-        ),
-    ]
+    _project_budget_unique = models.Constraint(
+        "UNIQUE(project_id)",
+        "Each project can only have one main budget record.",
+    )
+    _check_amounts_positive = models.Constraint(
+        "CHECK(total_amount >= 0.0 AND spent_amount >= 0.0)",
+        "Total and spent budget amounts cannot be negative.",
+    )
+    _check_dates_valid = models.Constraint(
+        "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
+        "Budget end date must be on or after the start date.",
+    )
 
     # @api.constrains("project_id")
     # def _check_project_budget_unique(self):

@@ -54,15 +54,11 @@ class ExperimentResource(models.Model):
     #                 "Please enter a valid quantity."
     #             )
 
-    _sql_constraints = [
-        models.Constraint(
-            "experiment_resource_unique",
-            "UNIQUE(experiment_id, resource_id)",
-            "Duplicate Resource Assignment: A resource can only be assigned once per experiment.",
-        ), 
-        models.Constraint(
-            "check_quantity_positive",
-            "CHECK(quantity > 0.0)",
-            "Invalid Quantity: Quantity must be strictly greater than zero.",
-        ),
-    ]
+    _experiment_resource_unique = models.Constraint(
+        "UNIQUE(experiment_id, resource_id)",
+        "Duplicate Resource Assignment: A resource can only be assigned once per experiment.",
+    )
+    _check_quantity_positive = models.Constraint(
+        "CHECK(quantity > 0.0)",
+        "Invalid Quantity: Quantity must be strictly greater than zero.",
+    )

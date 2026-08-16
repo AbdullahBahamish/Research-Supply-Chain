@@ -77,23 +77,18 @@ class ResearchPaper(models.Model):
         store=True,
     )
 
-    _sql_constraints = [
-        models.Constraint(
-            "check_published_doi_required",
-            "CHECK (paper_status != 'published' OR (paper_doi IS NOT NULL AND trim(paper_doi) != ''))",
-            "A valid DOI is required when the paper status is set to 'Published'.",
-        ),
-        models.Constraint(
-            "check_published_date_required",
-            "CHECK(paper_status != 'published' OR paper_publication_date IS NOT NULL)",
-            "A publication date is required when the paper status is set to 'Published'.",
-        ),
-        models.Constraint(
-            "check_paper_name_length",
-            "CHECK(paper_name IS NULL OR length(trim(paper_name)) >= 5)",
-            "Paper title must be at least 5 characters long.",
-        ),
-    ]
+    _check_published_doi_required = models.Constraint(
+        "CHECK (paper_status != 'published' OR (paper_doi IS NOT NULL AND trim(paper_doi) != ''))",
+        "A valid DOI is required when the paper status is set to 'Published'.",
+    )
+    _check_published_date_required = models.Constraint(
+        "CHECK(paper_status != 'published' OR paper_publication_date IS NOT NULL)",
+        "A publication date is required when the paper status is set to 'Published'.",
+    )
+    _check_paper_name_length = models.Constraint(
+        "CHECK(paper_name IS NULL OR length(trim(paper_name)) >= 5)",
+        "Paper title must be at least 5 characters long.",
+    )
 
     @api.constrains("paper_doi")
     def _check_doi_format(self):
