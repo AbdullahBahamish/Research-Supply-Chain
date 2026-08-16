@@ -21,7 +21,7 @@ This document provides a comprehensive technical reference for all custom models
 | `project_line_ids` | One2many | `research.project.researcher` | Reverse relation to team allocations. |
 
 ### Constraints
-- `_sql_constraints`: `("user_id_uniq", "UNIQUE(user_id)", "A user can only be linked to one researcher profile.")`
+- Odoo 19 Constraint: `_user_unique = models.Constraint("UNIQUE(user_id)", "A researcher profile already exists for this user account.")`
 
 ---
 
