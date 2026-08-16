@@ -1,51 +1,83 @@
 # Postman API Testing Guide
 
-This guide explains how to test all **Research Supply Chain** module APIs using **Postman**.
+This guide explains how to test all API endpoints in the **Research Supply Chain** module using **Postman**.
 
 ---
 
-## 🚀 Quick Start: Import Ready-Made Postman Collection
+## Quick Start: Import Ready-Made Postman Collection
 
-A pre-configured Postman Collection is included in this repository:
-- **File**: [`docs/Research_Supply_Chain.postman_collection.json`](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/Research_Supply_Chain.postman_collection.json)
+A pre-configured Postman Collection is included directly in this repository:
+- **Collection File**: [`docs/Research_Supply_Chain.postman_collection.json`](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/Research_Supply_Chain.postman_collection.json)
 
 ### How to Import into Postman:
 1. Open **Postman**.
 2. Click **Import** (top left button).
 3. Drag & drop [`docs/Research_Supply_Chain.postman_collection.json`](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/Research_Supply_Chain.postman_collection.json) or select the file.
-4. Set collection environment variables (if your port or database name differs):
+4. Set collection environment variables (if your server port or database name differs):
    - `base_url`: `http://localhost:8069`
-   - `db_name`: `ODOO_FirstDB`
+   - `db_name`: `research_db`
    - `username`: `admin`
    - `password`: `admin`
 
 ---
 
-## 📡 API Endpoints Overview
+## API Requests Catalog
 
-### 1. Authentication (Login First)
-Before making requests to restricted endpoints, run the **Authenticate** request to obtain session cookies.
+### 1. Authentication (Login Request)
+Run the **Authenticate / Login** request first to obtain session cookies stored automatically by Postman.
 
-- **URL**: `POST http://localhost:8069/web/session/authenticate`
-- **Header**: `Content-Type: application/json`
+- **URL**: `POST {{base_url}}/web/session/authenticate`
+- **Headers**: `Content-Type: application/json`
 - **Body**:
 ```json
 {
   "jsonrpc": "2.0",
   "params": {
-    "db": "ODOO_FirstDB",
-    "login": "admin",
-    "password": "admin"
+    "db": "{{db_name}}",
+    "login": "{{username}}",
+    "password": "{{password}}"
   }
 }
 ```
 
 ---
 
-### 2. Custom Module REST Endpoints
+### 2. Module REST Endpoints
 
-#### A. Fetch Projects
-- **URL**: `POST http://localhost:8069/api/v1/projects`
+#### A. Fetch Filtered Projects (`/api/v1/projects`)
+- **URL**: `POST {{base_url}}/api/v1/projects`
+- **Body**:
+```json
+{
+  "jsonrpc": "2.0",
+  "params": {
+    "filters": {
+      "project_status": "in_progress"
+    },
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+#### B. Create New Project (`/api/v1/project/create`)
+- **URL**: `POST {{base_url}}/api/v1/project/create`
+- **Body**:
+```json
+{
+  "jsonrpc": "2.0",
+  "params": {
+    "vals": {
+      "project_name": "Autonomous Campus Micro-Logistics",
+      "project_description": "Created via Postman API integration runner.",
+      "project_status": "proposed"
+    }
+  }
+}
+```
+
+#### C. Fetch Researchers Directory (`/api/v1/researchers`)
+- **URL**: `POST {{base_url}}/api/v1/researchers`
 - **Body**:
 ```json
 {
@@ -56,70 +88,58 @@ Before making requests to restricted endpoints, run the **Authenticate** request
 }
 ```
 
-#### B. Create New Project
-- **URL**: `POST http://localhost:8069/api/v1/project/create`
+#### D. Fetch Grouped Experiments (`/api/v1/experiments`)
+- **URL**: `POST {{base_url}}/api/v1/experiments`
 - **Body**:
 ```json
 {
   "jsonrpc": "2.0",
   "params": {
-    "vals": {
-      "project_name": "Postman Tested Research Project",
-      "project_description": "Created via API call from Postman",
-      "project_status": "in_progress"
-    }
+    "limit": 50
   }
 }
 ```
 
-#### C. Fetch Researchers
-- **URL**: `POST http://localhost:8069/api/v1/researchers`
+#### E. Fetch Internal Papers (`/api/v1/papers`)
+- **URL**: `POST {{base_url}}/api/v1/papers`
 - **Body**:
 ```json
 {
   "jsonrpc": "2.0",
-  "params": {}
+  "params": {
+    "limit": 50
+  }
 }
 ```
 
-#### D. Fetch Experiments
-- **URL**: `POST http://localhost:8069/api/v1/experiments`
+#### F. Fetch Published Papers Publicly (`/api/v1/papers/public`)
+- **URL**: `POST {{base_url}}/api/v1/papers/public` (No authentication required)
 - **Body**:
 ```json
 {
   "jsonrpc": "2.0",
-  "params": {}
-}
-```
-
-#### E. Fetch Research Papers
-- **URL**: `POST http://localhost:8069/api/v1/papers`
-- **Body**:
-```json
-{
-  "jsonrpc": "2.0",
-  "params": {}
+  "params": {
+    "limit": 10
+  }
 }
 ```
 
 ---
 
-### 3. Native Odoo ORM Endpoints (`call_kw`)
+### 3. Native Odoo RPC Calls (`/web/dataset/call_kw`)
 
-You can also directly query any model in the system using Odoo's native ORM RPC endpoint:
+You can query any model directly using standard Odoo RPC:
 
-- **URL**: `POST http://localhost:8069/web/dataset/call_kw/research.project/search_read`
-- **Body**:
 ```json
 {
   "jsonrpc": "2.0",
   "method": "call",
   "params": {
-    "model": "research.project",
+    "model": "project.budget",
     "method": "search_read",
     "args": [[]],
     "kwargs": {
-      "fields": ["code", "project_name", "project_status", "start_date", "end_date"]
+      "fields": ["project_id", "total_amount", "spent_amount", "remaining_amount"]
     }
   }
 }

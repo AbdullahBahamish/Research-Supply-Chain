@@ -13,7 +13,7 @@
     },
     {
       "key": "db_name",
-      "value": "ODOO_FirstDB",
+      "value": "research_db",
       "type": "string"
     },
     {
@@ -70,14 +70,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"limit\": 50\n  }\n}"
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"filters\": {\n      \"project_status\": \"in_progress\"\n    },\n    \"limit\": 50,\n    \"offset\": 0\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/projects",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "projects"]
             },
-            "description": "Fetches list of research projects."
+            "description": "Fetches list of research projects with equality filtering and pagination."
           }
         },
         {
@@ -92,14 +92,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"vals\": {\n      \"project_name\": \"Postman API Integration Test Project\",\n      \"project_description\": \"Created via Postman REST API Test Collection\",\n      \"project_status\": \"in_progress\"\n    }\n  }\n}"
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"vals\": {\n      \"project_name\": \"Postman API Integration Test Project\",\n      \"project_description\": \"Created via Postman REST API Test Collection\",\n      \"project_status\": \"proposed\"\n    }\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/project/create",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "project", "create"]
             },
-            "description": "Creates a new research project record."
+            "description": "Creates a new research project record safely."
           }
         },
         {
@@ -114,14 +114,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {}\n}"
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"limit\": 50\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/researchers",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "researchers"]
             },
-            "description": "Fetches active researchers list."
+            "description": "Fetches active researchers directory (privacy-scoped)."
           }
         },
         {
@@ -136,14 +136,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {}\n}"
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"limit\": 50\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/experiments",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "experiments"]
             },
-            "description": "Fetches research experiments list."
+            "description": "Fetches research experiments grouped by status."
           }
         },
         {
@@ -158,14 +158,36 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {}\n}"
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"limit\": 50\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/papers",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "papers"]
             },
-            "description": "Fetches research papers list."
+            "description": "Fetches internal research papers list."
+          }
+        },
+        {
+          "name": "Get Public Papers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"params\": {\n    \"limit\": 10\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/papers/public",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "papers", "public"]
+            },
+            "description": "Public endpoint for external published paper citation."
           }
         }
       ]

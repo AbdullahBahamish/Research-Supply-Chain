@@ -4,5 +4,7 @@
   ],
   "python.autoComplete.extraPaths": [
     "D:/Program Files D/Odoo 19.0.20260810/server"
-  ]
+  ],
+  "xml.symbols.enabled": false,
+  "python.languageServer": "None"
 }

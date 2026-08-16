@@ -1,0 +1,31 @@
+[[config]]
+name = "default"
+extends = ""
+
+odoo_path = "D:\\Program Files D\\Odoo 19.0.20260810\\server"
+
+addons_paths = [
+    "D:\\Program Files D\\Odoo 19.0.20260810\\server\\odoo\\addons",
+    "D:\\Center\\Github_Profile\\Research-Supply-Chain\\addons"
+]
+
+addons_merge = "merge"
+
+python_path = "D:\\Program Files D\\Odoo 19.0.20260810\\python\\python.exe"
+
+stdlib = ""
+
+additional_stubs = []
+additional_stubs_merge = "merge"
+
+additional_languages = []
+
+file_cache = true
+diag_missing_imports = "all"
+ac_filter_model_names = true
+auto_refresh_delay = 1000
+
+diagnostic_settings = {}
+diagnostic_filters = []
+
+no_typeshed_stubs = false

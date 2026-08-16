@@ -1,98 +1,99 @@
-# Getting Started & Deployment Guide
+# Getting Started & Operations Guide
 
-This guide provides step-by-step instructions for setting up, installing, upgrading, and troubleshooting the **Research Supply Chain** Odoo 19 module.
+This guide provides step-by-step instructions for installing, configuring, upgrading, and operating the **Research Supply Chain** Odoo 19 module.
 
 ---
 
-## 📋 Prerequisites
+## System Prerequisites
 
 - **Odoo Version**: Odoo 19.0 (Enterprise or Community Edition)
-- **Python Version**: Python 3.10+ (using Odoo's embedded Python environment)
+- **Python Runtime**: Python 3.10+ (using Odoo's embedded Python environment)
 - **Database Engine**: PostgreSQL 12+
 
 ---
 
-## 🚀 Installation & Module Loading
+## Installation & Environment Setup
 
-### Step 1: Clone Repository into Addons Path
-Clone or copy this repository into your Odoo custom addons directory:
+### 1. Addon Placement
+Copy or clone this repository into your Odoo custom addons directory:
 
 ```bash
 cd /path/to/odoo/custom_addons
 git clone https://github.com/AbdullahBahamish/Research-Supply-Chain.git
 ```
 
-### Step 2: Configure `odoo.conf`
+### 2. Configure `odoo.conf`
 Ensure the custom addons directory is added to your `addons_path` in `odoo.conf`:
 
 ```ini
 [options]
-addons_path = D:\Program Files D\Odoo 19.0.20260810\server\odoo\addons,d:\Center\Github_Profile\Research-Supply-Chain\addons
+addons_path = /path/to/odoo/addons,d:\Center\Github_Profile\Research-Supply-Chain\addons
 ```
 
-### Step 3: Install or Upgrade Module
+### 3. Module Activation & Upgrade Commands
 
-#### Option A: Via Command Line (Recommended for Developers)
-Ensure you use **Odoo's embedded Python executable**, not global system Python:
-
-```cmd
-# Navigate to Odoo server directory
-cd "D:\Program Files D\Odoo 19.0.20260810\server"
-
-# Run upgrade command
-"..\python\python.exe" odoo-bin -c odoo.conf -d <YOUR_DB_NAME> -u research_supply_chain
+#### CLI Installation / Upgrade (Recommended)
+```bash
+./odoo-bin -c odoo.conf -d research_db -i research_supply_chain
 ```
 
-#### Option B: Via Odoo Web Browser Interface
+To upgrade an existing installation after pulling code updates:
+```bash
+./odoo-bin -c odoo.conf -d research_db -u research_supply_chain
+```
+
+#### Web Interface Activation
 1. Log into your Odoo instance as Administrator.
 2. Navigate to **Apps**.
-3. Clear the search bar filter (click `X` on **Apps**).
+3. Clear the search bar filter (`Apps`).
 4. Search for `Research Supply Chain`.
 5. Click **Activate** (or **Upgrade** if already installed).
 
 ---
 
-## 🛠️ Common Errors & Troubleshooting
+## Common Errors & Troubleshooting Matrix
 
-### Issue 1: `python: can't open file 'odoo-bin': No such file or directory`
-- **Cause**: Command executed outside of Odoo server directory (e.g. `C:\Windows\System32`).
-- **Fix**: `cd` into your Odoo installation's `server` folder before executing `odoo-bin`.
-
-### Issue 2: `ModuleNotFoundError: No module named 'babel'`
-- **Cause**: Using global system Python (e.g. `C:\Program Files\Python314\python.exe`) instead of Odoo's bundled Python virtual environment.
-- **Fix**: Use `"..\python\python.exe"` (or the exact path to Odoo's Python executable).
-
-### Issue 3: No Fake Data Appearing
-- **Cause**: Database was not initialized with `--demo` flag.
-- **Fix**: As of recent updates, demo XML is included directly under `"data"` in [__manifest__.py](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/__manifest__.py). Simply run `-u research_supply_chain` or use the in-app wizard (**Research Supply Chain ➔ Tools ➔ Generate Sample Data**).
+| Symptom / Error Log | Root Cause | Solution |
+| :--- | :--- | :--- |
+| `python: can't open file 'odoo-bin'` | Command executed outside of Odoo server directory. | Change directory (`cd`) to your Odoo installation root before executing `odoo-bin`. |
+| `ModuleNotFoundError: No module named 'babel'` | Command executed using global system Python instead of Odoo's virtual environment. | Use Odoo's bundled Python executable path (`/path/to/odoo/venv/bin/python`). |
+| `AccessError: Restricted model access` | User account is missing required security group. | Assign user to **Research User**, **Research Officer**, or **Research Manager** under Settings ➔ Users. |
+| `ValidationError: End date before start date` | Date range validation trigger failed. | Ensure `end_date` is scheduled on or after `start_date`. |
 
 ---
 
-## 📁 Repository Structure Overview
+## Repository Directory Reference
 
 ```
 Research-Supply-Chain/
-├── README.md
-├── docs/
-│   ├── INDEX.md
-│   ├── ARCHITECTURE.md
-│   ├── DATA_MODELS.md
-│   ├── TESTING_AND_DATA_GENERATION.md
-│   └── GETTING_STARTED.md
+├── README.md                                    # Main repository overview
+├── odools.toml                                  # Toolchain settings
 ├── scripts/
-│   └── generate_fake_data.py
+│   └── generate_fake_data.py                    # Bulk synthetic data generation script
+├── docs/                                        # Complete 8-guide technical documentation suite
+│   ├── INDEX.md                                 # Technical documentation index
+│   ├── ARCHITECTURE.md                          # Architecture, ER diagram, and security model
+│   ├── DATA_MODELS.md                           # Model field-by-field specification
+│   ├── PYTHON_CONCEPTS_GUIDE.md                 # Python OOP, decorators, generators, & itertools
+│   ├── API_DOCUMENTATION.md                     # REST/JSON-RPC API endpoint guide
+│   ├── POSTMAN_API_GUIDE.md                     # Postman testing guide
+│   ├── Research_Supply_Chain.postman_collection.json # Ready-to-use Postman collection
+│   ├── TESTING_AND_DATA_GENERATION.md           # Test suite & synthetic data guide
+│   └── GETTING_STARTED.md                       # Installation & operations guide
 └── addons/
     └── research_supply_chain/
-        ├── __init__.py
-        ├── __manifest__.py
+        ├── __init__.py                          # Package root
+        ├── __manifest__.py                      # Odoo module manifest
+        ├── controllers/
+        │   └── main.py                          # REST API controllers & sanitizers
         ├── data/
-        │   └── research_supply_chain_data.xml
+        │   ├── research_supply_chain_data.xml   # Sequences & initial data
+        │   └── ir_cron_data.xml                 # Scheduled cron jobs
         ├── demo/
-        │   └── research_supply_chain_demo.xml
-        ├── models/
-        │   ├── __init__.py
-        │   ├── researcher.py
+        │   └── research_supply_chain_demo.xml   # Initial demo dataset
+        ├── models/                              # ORM models & abstract mixins
         │   ├── research_project.py
+        │   ├── researcher.py
         │   ├── research_project_researcher.py
         │   ├── project_budget.py
         │   ├── research_requirement.py
@@ -101,21 +102,19 @@ Research-Supply-Chain/
         │   ├── experiment_resource.py
         │   ├── research_output.py
         │   ├── research_paper.py
+        │   ├── project_tag.py
+        │   ├── mixins.py
         │   └── sample_data_wizard.py
         ├── security/
-        │   ├── research_security.xml
-        │   └── ir.model.access.csv
-        ├── static/
-        │   └── description/
-        └── views/
-            ├── researcher_views.xml
-            ├── research_project_views.xml
-            ├── project_budget_views.xml
-            ├── research_requirement_views.xml
-            ├── research_resource_views.xml
-            ├── experiment_views.xml
-            ├── research_output_views.xml
-            ├── research_paper_views.xml
-            ├── sample_data_wizard_views.xml
-            └── research_supply_chain_menus.xml
+        │   ├── research_security.xml            # Groups & record rules
+        │   └── ir.model.access.csv              # Model access rights (ACL)
+        ├── tests/                               # Automated unit test suite
+        │   ├── test_research_project.py
+        │   ├── test_researcher.py
+        │   ├── test_requirements.py
+        │   ├── test_experiment.py
+        │   ├── test_cron_jobs.py
+        │   ├── test_dynamic_changes.py
+        │   └── test_inverse_functions.py
+        └── views/                               # Odoo UI views & menus
 ```

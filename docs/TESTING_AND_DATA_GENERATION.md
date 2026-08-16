@@ -1,108 +1,98 @@
-# Synthetic Data Generation & Testing Guide
+# Synthetic Data Generation & Automated Testing Guide
 
-This guide explains how to generate, manage, and verify test/fake data within the **Research Supply Chain** module.
+This guide explains how to execute automated test suites, run data generation pipelines, and perform database audits within the **Research Supply Chain** module.
 
 ---
 
-## 🎯 Overview of Data Pipelines
+## 1. Automated Test Suite Execution
+
+The module includes an automated unit test suite located in [`addons/research_supply_chain/tests/`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/):
+
+### Test Modules Catalog
+- **[`test_research_project.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_research_project.py)** — Tests project creation, code generation, date constraints, and skills analysis set operations.
+- **[`test_researcher.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_researcher.py)** — Tests user link constraints and researcher profile active states.
+- **[`test_requirements.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_requirements.py)** — Tests requirement priority, category, and date validation constraints.
+- **[`test_experiment.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_experiment.py)** — Tests experiment status transitions, objective validation, and resource allocations.
+- **[`test_cron_jobs.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_cron_jobs.py)** — Tests scheduled automated project/experiment status updates.
+- **[`test_dynamic_changes.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_dynamic_changes.py)** — Tests dynamic line creations, onchange handlers, and computed budget totals.
+- **[`test_inverse_functions.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_inverse_functions.py)** — Tests inverse setters for budget amounts, experiment counts, and paper counts.
+
+### Executing Automated Tests
+Run tests using the standard Odoo test runner CLI:
+
+```bash
+./odoo-bin -c odoo.conf -d research_test_db --test-enable --test-tags=research_supply_chain --stop-after-init
+```
+
+---
+
+## 2. Synthetic Data Pipelines
 
 To evaluate views, stress-test search filters, verify database constraints, and demonstrate functionality, 3 complementary data generation pipelines are implemented:
 
-```
-                                    Synthetic Data Pipelines
-                                               │
-             ┌─────────────────────────────────┼────────────────────────────────┐
-             │                                 │                                │
-             ▼                                 ▼                                ▼
-+──────────────────────────+     +──────────────────────────+     +──────────────────────────+
-|  Pipeline 1: Demo XML    |     |  Pipeline 2: UI Wizard   |     | Pipeline 3: Python Script|
-|  (Self-Contained Data)   |     |  (Interactive Web UI)    |     | (Odoo Shell Bulk Script) |
-+──────────────────────────+     +──────────────────────────+     +──────────────────────────+
-| Location:                |     | Location:                |     | Location:                |
-| demo/research_supply_... |     | Tools -> Generate Sample |     | scripts/generate_fake... |
-| Automatic on install     |     | 1-click in browser       |     | Bulk benchmark testing   |
-+──────────────────────────+     +──────────────────────────+     +──────────────────────────+
+```mermaid
+graph TD
+    ROOT["Synthetic Data Pipelines"] --> P1["Pipeline 1: Demo XML<br/>(Self-Contained Data)"]
+    ROOT --> P2["Pipeline 2: UI Wizard<br/>(Interactive Web UI)"]
+    ROOT --> P3["Pipeline 3: Python Script<br/>(Odoo Shell Bulk Script)"]
+    
+    P1 --> D1["Location: demo/research_supply_chain_demo.xml<br/>Automatic on DB creation --demo"]
+    P2 --> D2["Location: Tools -> Generate Sample Data<br/>1-click browser population"]
+    P3 --> D3["Location: scripts/generate_fake_data.py<br/>Bulk benchmark testing"]
 ```
 
 ---
 
-## 📌 Pipeline 1: Native Self-Contained XML Data
+## Pipeline 1: Native Self-Contained XML Data
 
-- **File**: [addons/research_supply_chain/demo/research_supply_chain_demo.xml](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/demo/research_supply_chain_demo.xml)
-- **Manifest Listing**: Included under `"data"` in [__manifest__.py](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/__manifest__.py).
-
-### How it Works
-Unlike default Odoo demo files which require `--demo` flags upon DB creation, this dataset is self-contained and included under `"data"`. Whenever the module is installed or upgraded, Odoo populates:
-- 4 Researchers (PI, Postdoc, Bioinformatician, Quantum Scientist)
-- 4 Funded Projects (`AI Supply Chain`, `Quantum Network Routing`, `Genomic Sequencing`, `Autonomous Drone Logistics`)
-- 4 Budgets ($90,000 to $300,000)
-- Requirements, Resources (H100 GPUs, QPU Cloud channels, NovaSeq arrays), Experiments, Outputs, and Papers.
+- **File**: [`addons/research_supply_chain/demo/research_supply_chain_demo.xml`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/demo/research_supply_chain_demo.xml)
+- **Manifest Listing**: Included under `"demo"` in [`__manifest__.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/__manifest__.py).
 
 ### How to Load
-Upgrade the module from CMD or Odoo UI:
+Run Odoo with demo data enabled:
 ```bash
-python odoo-bin -c odoo.conf -d <your_database_name> -u research_supply_chain
+./odoo-bin -c odoo.conf -d research_demo_db --dev=all
 ```
 
 ---
 
-## 📌 Pipeline 2: Interactive UI Wizard ("Generate Sample Data")
+## Pipeline 2: Interactive UI Wizard ("Generate Sample Data")
 
-- **Source Files**: [models/sample_data_wizard.py](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/models/sample_data_wizard.py) & [views/sample_data_wizard_views.xml](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/views/sample_data_wizard_views.xml)
+- **Source Files**: [`models/sample_data_wizard.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/models/sample_data_wizard.py) & [`views/sample_data_wizard_views.xml`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/views/sample_data_wizard_views.xml)
 
 ### How to Use via Web Browser
 1. Log into Odoo web interface.
 2. Open **Research Supply Chain** module.
 3. Click on **Tools** ➔ **Generate Sample Data**.
-4. Set the number of **Projects** and **Researchers** to create.
+4. Set the desired number of **Projects** and **Researchers** to create.
 5. Click **Generate Fake Data**.
-
-```
-+-------------------------------------------------------------+
-| Generate Sample Data                                    [X] |
-+-------------------------------------------------------------+
-| Number of Projects:     [ 5 ]                               |
-| Number of Researchers:  [ 5 ]                               |
-|                                                             |
-| Clicking "Generate Fake Data" will populate synthetic       |
-| records across Projects, Researchers, Budgets, Requirements,|
-| Resources, Experiments, Outputs, and Research Papers.       |
-|                                                             |
-| [ Generate Fake Data ]  [ Cancel ]                          |
-+-------------------------------------------------------------+
-```
 
 ---
 
-## 📌 Pipeline 3: Bulk Odoo Shell Script
+## Pipeline 3: Bulk Odoo Shell Script
 
-- **Script File**: [scripts/generate_fake_data.py](file:///d:/Center/Github_Profile/Research-Supply-Chain/scripts/generate_fake_data.py)
+- **Script File**: [`scripts/generate_fake_data.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/scripts/generate_fake_data.py)
 
-### How to Use
+### How to Execute via Odoo Shell
 For high-volume stress testing (e.g. creating 50 projects and 20 researchers):
 
-#### Command Line Execution:
 ```bash
-# Using Odoo's Python executable
-"..\python\python.exe" odoo-bin shell -c odoo.conf -d <your_database_name> < scripts/generate_fake_data.py
+./odoo-bin shell -c odoo.conf -d research_db < scripts/generate_fake_data.py
 ```
 
-#### Interactive Odoo Shell Execution:
+Or interactively inside the Python Odoo shell:
 ```python
-python odoo-bin shell -c odoo.conf -d <your_database_name>
-
 >>> from scripts.generate_fake_data import generate_all_fake_data
 >>> generate_all_fake_data(env, num_projects=20, num_researchers=10)
 ```
 
 ---
 
-## 🧪 Verification & Audit Commands
+## 3. Verification & Database Audit Commands
 
-To verify that synthetic data was correctly populated in PostgreSQL/Odoo:
+Verify record counts directly in the Odoo shell:
 
 ```python
-# In Odoo shell:
 print("Projects:", env['research.project'].search_count([]))
 print("Researchers:", env['research.researcher'].search_count([]))
 print("Budgets:", env['project.budget'].search_count([]))

@@ -1,47 +1,49 @@
 # API Specification & Reference Guide
 
-This document provides complete, production-grade technical specifications for the **Research Supply Chain** API endpoints.
+This document provides production-grade technical specifications for all REST and JSON-RPC API endpoints in the **Research Supply Chain** module.
 
 ---
 
-## 🏛️ Odoo Controller Architecture
+## Controller Architecture & Security Model
 
-In standard Odoo framework architecture, API controllers are housed in the **`controllers/`** folder of the module:
+API controllers are implemented in [`addons/research_supply_chain/controllers/main.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/controllers/main.py). 
 
 ```
 addons/research_supply_chain/
 ├── __init__.py          # Imports models and controllers
-├── controllers/         # Official Odoo directory for REST/JSON HTTP endpoints
+├── controllers/         # Official Odoo HTTP/JSON endpoint directory
 │   ├── __init__.py
-│   └── main.py          # API route definitions (@http.route)
+│   └── main.py          # API routes (@http.route) & input sanitizers
 ```
 
-This is the official, Odoo-recommended location for exposing custom HTTP, JSON-RPC, REST, and webhook interfaces.
+### Security Guardrails & Sanitization
+- **Strict Parameter Allow-lists**: Unsafe raw domain injection probes are blocked using `PROJECT_SEARCH_FIELDS` (`{"project_status", "code", "lead_researcher_id", "visibility", "tag_ids"}`).
+- **Mass-Assignment Protection**: Input payloads on creation are filtered via `PROJECT_CREATE_FIELDS` (`{"project_name", "project_description", "lead_researcher_id", "start_date", "end_date", "project_status", "visibility", "tag_ids"}`).
+- **Privacy Field Filtering**: Directory endpoints (such as `/api/v1/researchers`) restrict sensitive field exposures (e.g. user email addresses are excluded from public directory lists).
 
 ---
 
-## 🔒 Authentication & Session Management
+## Session Authentication
 
-All endpoints require user authentication. Odoo utilizes **session-based cookie authentication**.
+Authenticated endpoints require an active Odoo session cookie obtained via the standard authentication route:
 
-### 1. Login Endpoint
 - **URL**: `/web/session/authenticate`
-- **HTTP Method**: `POST`
+- **Method**: `POST`
 - **Content-Type**: `application/json`
 
-#### Request Payload
+### Request Payload
 ```json
 {
   "jsonrpc": "2.0",
   "params": {
-    "db": "ODOO_FirstDB",
+    "db": "research_db",
     "login": "admin",
     "password": "admin"
   }
 }
 ```
 
-#### Successful Response (`200 OK`)
+### Response Payload (`200 OK`)
 ```json
 {
   "jsonrpc": "2.0",
@@ -49,26 +51,23 @@ All endpoints require user authentication. Odoo utilizes **session-based cookie 
   "result": {
     "session_id": "8e3b1c9f204217a...",
     "uid": 2,
-    "user_context": {
-      "lang": "en_US",
-      "tz": "UTC"
-    },
+    "user_context": { "lang": "en_US", "tz": "UTC" },
     "username": "Mitchell Admin",
     "partner_id": 3
   }
 }
 ```
-*Note: The server returns a `session_id` cookie in the HTTP response headers. Postman and HTTP clients automatically store and send this cookie in subsequent API requests.*
 
 ---
 
-## 🚀 Module REST Endpoints (`/api/v1/...`)
+## Module REST / JSON-RPC Endpoints (`/api/v1/...`)
 
 ### 1. Get Projects
-Fetches research projects with optional domain filtering and pagination limit.
+Fetches active research projects with whitelisted equality filtering and pagination.
 
 - **URL**: `/api/v1/projects`
 - **Method**: `POST`
+- **Auth**: User (`auth='user'`)
 - **Content-Type**: `application/json`
 
 #### Request Payload
@@ -76,8 +75,11 @@ Fetches research projects with optional domain filtering and pagination limit.
 {
   "jsonrpc": "2.0",
   "params": {
-    "domain": [["project_status", "=", "in_progress"]],
-    "limit": 20
+    "filters": {
+      "project_status": "in_progress"
+    },
+    "limit": 20,
+    "offset": 0
   }
 }
 ```
@@ -89,17 +91,18 @@ Fetches research projects with optional domain filtering and pagination limit.
   "id": null,
   "result": {
     "status": 200,
-    "count": 2,
+    "count": 1,
+    "offset": 0,
+    "limit": 20,
     "data": [
       {
         "id": 1,
         "code": "PRJ00001",
-        "project_name": "AI-Driven Supply Chain Optimization",
-        "project_description": "Developing machine learning algorithms...",
-        "lead_researcher_id": [1, "Dr. Mitchell Admin"],
+        "project_name": "Ai-Driven Supply Chain Optimization",
+        "lead_researcher": "Dr. Alice Vance",
+        "status": "in_progress",
         "start_date": "2026-01-01",
-        "end_date": "2026-12-31",
-        "project_status": "in_progress"
+        "end_date": "2026-12-31"
       }
     ]
   }
@@ -109,10 +112,11 @@ Fetches research projects with optional domain filtering and pagination limit.
 ---
 
 ### 2. Create Project
-Creates a new research project record in the database.
+Safely creates a new research project record.
 
 - **URL**: `/api/v1/project/create`
 - **Method**: `POST`
+- **Auth**: User (`auth='user'`)
 - **Content-Type**: `application/json`
 
 #### Request Payload
@@ -121,8 +125,8 @@ Creates a new research project record in the database.
   "jsonrpc": "2.0",
   "params": {
     "vals": {
-      "project_name": "Autonomous Drone Supply Network",
-      "project_description": "Deploying quadcopters for micro-deliveries across campus units.",
+      "project_name": "Autonomous Drone Micro-Deliveries",
+      "project_description": "Deploying autonomous quadcopters for campus logistics.",
       "start_date": "2026-04-01",
       "end_date": "2026-10-31",
       "project_status": "proposed"
@@ -142,32 +146,65 @@ Creates a new research project record in the database.
     "project": {
       "id": 5,
       "code": "PRJ00005",
-      "project_name": "Autonomous Drone Supply Network",
+      "project_name": "Autonomous Drone Micro-Deliveries",
       "project_status": "proposed"
     }
   }
 }
 ```
 
-#### Error Response (`400 Bad Request`)
+---
+
+### 3. Get Researchers Directory
+Fetches active researcher profiles (privacy-scoped, email excluded).
+
+- **URL**: `/api/v1/researchers`
+- **Method**: `POST`
+- **Auth**: User (`auth='user'`)
+- **Content-Type**: `application/json`
+
+#### Request Payload
+```json
+{
+  "jsonrpc": "2.0",
+  "params": {
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+#### Response Payload (`200 OK`)
 ```json
 {
   "jsonrpc": "2.0",
   "id": null,
   "result": {
-    "status": 400,
-    "error": "Field project_name is required."
+    "status": 200,
+    "count": 2,
+    "offset": 0,
+    "limit": 50,
+    "data": [
+      {
+        "id": 1,
+        "name": "Dr. Alice Vance",
+        "position": "Senior Bioinformatician",
+        "expertise": "Genomics, High Performance Computing",
+        "is_principal": true
+      }
+    ]
   }
 }
 ```
 
 ---
 
-### 3. Get Researchers
-Fetches active researchers list.
+### 4. Get Experiments
+Fetches research experiments grouped by execution status.
 
-- **URL**: `/api/v1/researchers`
+- **URL**: `/api/v1/experiments`
 - **Method**: `POST`
+- **Auth**: User (`auth='user'`)
 - **Content-Type**: `application/json`
 
 #### Request Payload
@@ -187,75 +224,42 @@ Fetches active researchers list.
   "id": null,
   "result": {
     "status": 200,
-    "count": 3,
-    "data": [
-      {
-        "id": 1,
-        "name": "Dr. Alice Vance",
-        "email": "alice.vance@research.example.com",
-        "position": "Senior Bioinformatician",
-        "expertise": "Genomics, High Performance Computing",
-        "is_principal": true
-      }
-    ]
+    "count": 1,
+    "grouped_by_status": {
+      "running": [
+        {
+          "id": 1,
+          "name": "Transformer Benchmark Run 1",
+          "project_id": [1, "PRJ00001 AI-Driven Supply Chain Optimization"],
+          "objective": "Benchmark transformer convergence speed.",
+          "methodology": "Run 5-fold cross-validation.",
+          "status": "running",
+          "start_date": "2026-02-01"
+        }
+      ]
+    },
+    "data": [...]
   }
 }
 ```
 
 ---
 
-### 4. Get Experiments
-Fetches research experiments.
-
-- **URL**: `/api/v1/experiments`
-- **Method**: `POST`
-- **Content-Type**: `application/json`
-
-#### Request Payload
-```json
-{
-  "jsonrpc": "2.0",
-  "params": {}
-}
-```
-
-#### Response Payload (`200 OK`)
-```json
-{
-  "jsonrpc": "2.0",
-  "id": null,
-  "result": {
-    "status": 200,
-    "count": 2,
-    "data": [
-      {
-        "id": 1,
-        "name": "Supply Chain Transformer Fine-Tuning Benchmark",
-        "project_id": [1, "PRJ00001 AI-Driven Supply Chain Optimization"],
-        "objective": "Benchmark transformer model convergence speed...",
-        "methodology": "Run 5-fold cross-validation...",
-        "status": "running",
-        "start_date": "2026-02-01"
-      }
-    ]
-  }
-}
-```
-
----
-
-### 5. Get Research Papers
-Fetches research papers and publications.
+### 5. Get Papers
+Fetches internal academic publications and pre-prints.
 
 - **URL**: `/api/v1/papers`
 - **Method**: `POST`
+- **Auth**: User (`auth='user'`)
 - **Content-Type**: `application/json`
 
 #### Request Payload
 ```json
 {
   "jsonrpc": "2.0",
-  "params": {}
+  "params": {
+    "limit": 50
+  }
 }
 ```
 
@@ -266,15 +270,15 @@ Fetches research papers and publications.
   "id": null,
   "result": {
     "status": 200,
-    "count": 2,
+    "count": 1,
     "data": [
       {
         "id": 1,
-        "paper_name": "Deep Learning Approaches for Dynamic Research Supply Chain Routing",
-        "paper_author": "Jane Doe, John Smith, Dr. Alice Vance",
+        "paper_name": "Deep Learning for Dynamic Supply Routing",
+        "paper_author": "Dr. Alice Vance, Mitchell Admin",
         "paper_status": "draft",
         "paper_doi": "10.1038/s41587-025-01998-x",
-        "paper_github_url": "https://github.com/example/research-supply-chain-ai",
+        "paper_github_url": "https://github.com/example/research-supply-chain",
         "project_id": [1, "AI-Driven Supply Chain Optimization"]
       }
     ]
@@ -284,26 +288,42 @@ Fetches research papers and publications.
 
 ---
 
-## ⚙️ Native Odoo RPC Endpoint (`/web/dataset/call_kw`)
+### 6. Public Papers Endpoint
+Public endpoint for external citation of published research papers.
 
-For performing direct CRUD operations on any model (`research.project`, `project.budget`, `research.requirement`, `research.resource`, etc.):
-
-- **URL**: `/web/dataset/call_kw/<model_name>/<method_name>`
-- **Method**: `POST`
+- **URL**: `/api/v1/papers/public`
+- **Method**: `POST` / `GET`
+- **Auth**: Public (`auth='public'`)
 - **Content-Type**: `application/json`
 
-### Example: Generic `search_read` on Project Budgets
+#### Request Payload
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "call",
   "params": {
-    "model": "project.budget",
-    "method": "search_read",
-    "args": [[]],
-    "kwargs": {
-      "fields": ["project_id", "total_amount", "spent_amount", "remaining_amount"]
-    }
+    "limit": 10
+  }
+}
+```
+
+#### Response Payload (`200 OK`)
+```json
+{
+  "jsonrpc": "2.0",
+  "id": null,
+  "result": {
+    "status": 200,
+    "count": 1,
+    "data": [
+      {
+        "id": 2,
+        "paper_name": "Scalable Micro-Logistics Networks",
+        "paper_author": "Dr. Alice Vance",
+        "paper_doi": "10.1016/j.artint.2025.10399",
+        "paper_publication_date": "2026-03-15",
+        "paper_github_url": "https://github.com/example/drone-routing"
+      }
+    ]
   }
 }
 ```
