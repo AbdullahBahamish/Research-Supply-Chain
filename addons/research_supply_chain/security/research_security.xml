@@ -1,28 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Module Category -->
+    <!-- ========================================================================
+         SECURITY DOCTRINE
+         ==================================================================
+         1. GROUPS answer:        "What kind of person is this?"
+         2. ACCESS RIGHTS answer: "What can that kind of person touch?"
+         3. RECORD RULES answer:  "Can they touch THIS record?"
+
+         Record rules split into two families that are NEVER merged into one
+         domain unless explicitly noted:
+           (a) VISIBILITY  - who may READ a record (public / project scope)
+           (b) OWNERSHIP   - who may WRITE/DELETE a record (owner_id = user,
+                              or for research.project: lead_researcher_id)
+
+         A user may always read more than they may write. Nobody but
+         Administrator bypasses ownership. Research Manager gets broader
+         READ (organisation-wide oversight) and, on a short, explicitly
+         called-out list of RELATIONSHIP/FUNCTIONAL models (project team,
+         budgets, resources), broader WRITE - because those records are not
+         "someone's own work", they are organisational/financial/inventory
+         data with a different authorisation story. Everywhere else,
+         Manager write is governed by the same ownership rule as everyone
+         else.
+
+         perm_read/write/create/unlink are ALWAYS set explicitly on every
+         rule below - never left to implicit defaults.
+         ==================================================================== -->
+
+    <!-- Module / Privilege Category -->
     <record id="module_category_research_supply_chain" model="ir.module.category">
         <field name="name">Research Supply Chain</field>
         <field name="description">Manage research projects, resources, requirements, experiments, and outputs.</field>
         <field name="sequence">15</field>
     </record>
 
-    <!-- Privilege Category -->
     <record id="res_groups_privilege_research_supply_chain" model="res.groups.privilege">
         <field name="name">Research Supply Chain</field>
         <field name="sequence">15</field>
         <field name="category_id" ref="module_category_research_supply_chain"/>
     </record>
 
-    <!-- 1. User Group (Viewer) -->
+    <!-- ========================================================================
+         GROUPS
+         Only Researcher -> Project Lead is a genuine "is-a" inheritance chain.
+         Resource Officer, Finance Officer and Research Manager are ORTHOGONAL:
+         each implies only the base Research User group, so none of them
+         silently acquires research-authoring or leadership capability just
+         because it needs its own functional privileges.
+         ==================================================================== -->
+
+    <!-- 1. Research User - baseline authenticated participant. Implied by
+         every other group, so the ownership rules attached to this group
+         apply uniformly to everyone regardless of role. -->
     <record id="group_research_user" model="res.groups">
-        <field name="name">User (Viewer)</field>
+        <field name="name">Research User</field>
         <field name="sequence">10</field>
         <field name="privilege_id" ref="res_groups_privilege_research_supply_chain"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <!-- 2. Researcher Group -->
+    <!-- 2. Researcher - performs research work. -->
     <record id="group_researcher" model="res.groups">
         <field name="name">Researcher</field>
         <field name="sequence">20</field>
@@ -30,7 +67,9 @@
         <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
     </record>
 
-    <!-- 3. Project Lead / PI Group -->
+    <!-- 3. Project Lead - Principal Investigator / project owner capability.
+         Genuinely subsumes Researcher (a Lead can do everything a
+         Researcher can), so this is the one legitimate inheritance step. -->
     <record id="group_research_lead" model="res.groups">
         <field name="name">Project Lead</field>
         <field name="sequence">30</field>
@@ -38,45 +77,96 @@
         <field name="implied_ids" eval="[(4, ref('group_researcher'))]"/>
     </record>
 
-    <!-- 4. Research Manager Group -->
+    <!-- 4. Resource Officer - organisation-wide resource/inventory management.
+         Orthogonal: does NOT imply Researcher/Lead. Managing the equipment
+         pool does not imply any authority over other people's research. -->
+    <record id="group_research_resource_officer" model="res.groups">
+        <field name="name">Resource Officer</field>
+        <field name="sequence">25</field>
+        <field name="privilege_id" ref="res_groups_privilege_research_supply_chain"/>
+        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+    </record>
+
+    <!-- 5. Finance Officer - budget/financial control. Orthogonal for the
+         same reason: financial oversight must not grant research authority
+         (segregation of duties). -->
+    <record id="group_research_finance" model="res.groups">
+        <field name="name">Finance Officer</field>
+        <field name="sequence">26</field>
+        <field name="privilege_id" ref="res_groups_privilege_research_supply_chain"/>
+        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
+    </record>
+
+    <!-- 6. Research Manager - organisation-wide oversight. Deliberately does
+         NOT imply Project Lead: broader READ and a few named functional
+         WRITE exceptions, but ordinary ownership rules still gate write
+         access to other people's authored records (experiments, outputs,
+         papers, requirements). -->
     <record id="group_research_manager" model="res.groups">
         <field name="name">Research Manager</field>
         <field name="sequence">40</field>
         <field name="privilege_id" ref="res_groups_privilege_research_supply_chain"/>
-        <field name="implied_ids" eval="[(4, ref('group_research_lead'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_research_user'))]"/>
     </record>
 
-    <!-- 5. Administrator Group -->
+    <!-- 7. Administrator - the sole ownership bypass. -->
     <record id="group_research_admin" model="res.groups">
         <field name="name">Administrator</field>
-        <field name="sequence">50</field>
+        <field name="sequence">90</field>
         <field name="privilege_id" ref="res_groups_privilege_research_supply_chain"/>
         <field name="implied_ids" eval="[(4, ref('group_research_manager'))]"/>
         <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
-    <!-- ==================================================================== -->
-    <!-- RECORD RULES                                                         -->
-    <!-- ==================================================================== -->
 
-    <!-- Project Visibility Rules -->
-    <record id="rule_research_project_user" model="ir.rule">
-        <field name="name">Research Project: User/Researcher/Lead Visibility</field>
+    <!-- ========================================================================
+         RESEARCH PROJECT
+         Ownership anchor: lead_researcher_id.user_id
+         ==================================================================== -->
+
+    <record id="rule_project_read" model="ir.rule">
+        <field name="name">Research Project: Visibility (public / lead / team member)</field>
         <field name="model_id" ref="model_research_project"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('visibility', '=', 'public'), '|', ('lead_researcher_id.user_id', '=', user.id), ('researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('visibility', '=', 'public'),
+             '|', ('lead_researcher_id.user_id', '=', user.id),
+                  ('researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
         <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_project_owner_write" model="ir.rule">
+        <field name="name">Research Project: Owner Write (Lead only)</field>
+        <field name="model_id" ref="model_research_project"/>
+        <field name="groups" eval="[(4, ref('group_research_user'))]"/>
+        <field name="domain_force">
+            [('lead_researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_research_project_manager_admin" model="ir.rule">
-        <field name="name">Research Project: Manager/Admin Full Access</field>
+    <record id="rule_project_manager_read_all" model="ir.rule">
+        <field name="name">Research Project: Manager Organisation-Wide Read</field>
         <field name="model_id" ref="model_research_project"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_project_admin_bypass" model="ir.rule">
+        <field name="name">Research Project: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_project"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -84,24 +174,118 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Experiment Rules -->
-    <record id="rule_research_experiment_visibility" model="ir.rule">
-        <field name="name">Research Experiment: Project Visibility</field>
+
+    <!-- ========================================================================
+         PROJECT TEAM (research.project.researcher)
+         FUNCTIONAL EXCEPTION: this is a project<->researcher relationship,
+         not a personal document. It is managed by the project's own Lead
+         and by Research Manager, not by "whoever created the row".
+         ==================================================================== -->
+
+    <record id="rule_project_team_read" model="ir.rule">
+        <field name="name">Project Team: Visibility (mirrors project scope)</field>
+        <field name="model_id" ref="model_research_project_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_user'))]"/>
+        <field name="domain_force">
+            ['|', ('project_id.visibility', '=', 'public'),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_project_team_lead_manage" model="ir.rule">
+        <field name="name">Project Team: Lead Manages Own Project's Team</field>
+        <field name="model_id" ref="model_research_project_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_lead'))]"/>
+        <field name="domain_force">
+            [('project_id.lead_researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="rule_project_team_manager_manage" model="ir.rule">
+        <field name="name">Project Team: Manager Organisation-Wide (functional exception)</field>
+        <field name="model_id" ref="model_research_project_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="rule_project_team_admin_bypass" model="ir.rule">
+        <field name="name">Project Team: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_project_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+
+    <!-- ========================================================================
+         EXPERIMENT
+         Ownership anchor: owner_id. Write/create additionally require the
+         user to currently be a member (lead or team) of the parent project -
+         combined with AND logic so ownership alone, on a project you have since
+         left, is not enough.
+         ==================================================================== -->
+
+    <record id="rule_experiment_read" model="ir.rule">
+        <field name="name">Experiment: Visibility (mirrors project scope)</field>
         <field name="model_id" ref="model_research_experiment"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('project_id.visibility', '=', 'public'), '|', ('project_id.lead_researcher_id.user_id', '=', user.id), ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('project_id.visibility', '=', 'public'),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
         <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_experiment_owner_write" model="ir.rule">
+        <field name="name">Experiment: Owner Write (must remain a project member)</field>
+        <field name="model_id" ref="model_research_experiment"/>
+        <field name="groups" eval="[(4, ref('group_researcher'))]"/>
+        <field name="domain_force">
+            ['&amp;', ('owner_id', '=', user.id),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_research_experiment_manager" model="ir.rule">
-        <field name="name">Research Experiment: Manager Global Access</field>
+    <record id="rule_experiment_manager_read_all" model="ir.rule">
+        <field name="name">Experiment: Manager Organisation-Wide Read</field>
         <field name="model_id" ref="model_research_experiment"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_experiment_admin_bypass" model="ir.rule">
+        <field name="name">Experiment: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_experiment"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -109,20 +293,48 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Experiment Resource Allocation Rules -->
-    <record id="rule_experiment_resource_project_access" model="ir.rule">
-        <field name="name">Experiment Resources: Project Access</field>
+
+    <!-- ========================================================================
+         EXPERIMENT RESOURCE (relationship: experiment <-> resource)
+         Write follows the parent experiment's owner. Resource Officer also
+         gets full functional control since these rows represent allocation
+         of the equipment pool it is responsible for.
+         ==================================================================== -->
+
+    <record id="rule_experiment_resource_read" model="ir.rule">
+        <field name="name">Experiment Resources: Visibility (mirrors experiment's project scope)</field>
         <field name="model_id" ref="model_research_experiment_resource"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('experiment_id.project_id.visibility', '=', 'public'), '|', ('experiment_id.project_id.lead_researcher_id.user_id', '=', user.id), ('experiment_id.project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('experiment_id.project_id.visibility', '=', 'public'),
+             '|', ('experiment_id.project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('experiment_id.project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_experiment_resource_manager" model="ir.rule">
-        <field name="name">Experiment Resources: Manager Global Access</field>
+    <record id="rule_experiment_resource_owner_write" model="ir.rule">
+        <field name="name">Experiment Resources: Follows Experiment Owner</field>
         <field name="model_id" ref="model_research_experiment_resource"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_researcher'))]"/>
+        <field name="domain_force">
+            ['&amp;', ('experiment_id.owner_id', '=', user.id),
+             '|', ('experiment_id.project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('experiment_id.project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="rule_experiment_resource_officer_manage" model="ir.rule">
+        <field name="name">Experiment Resources: Resource Officer Manages Allocations (functional exception)</field>
+        <field name="model_id" ref="model_research_experiment_resource"/>
+        <field name="groups" eval="[(4, ref('group_research_resource_officer'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -130,20 +342,79 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Requirement Rules -->
-    <record id="rule_requirement_project_access" model="ir.rule">
-        <field name="name">Requirements: Project Access</field>
+    <record id="rule_experiment_resource_manager_read_all" model="ir.rule">
+        <field name="name">Experiment Resources: Manager Organisation-Wide Read</field>
+        <field name="model_id" ref="model_research_experiment_resource"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_experiment_resource_admin_bypass" model="ir.rule">
+        <field name="name">Experiment Resources: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_experiment_resource"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+
+    <!-- ========================================================================
+         REQUIREMENT
+         Ownership anchor: owner_id.
+         ==================================================================== -->
+
+    <record id="rule_requirement_read" model="ir.rule">
+        <field name="name">Requirement: Visibility (mirrors project scope)</field>
         <field name="model_id" ref="model_research_requirement"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('project_id.visibility', '=', 'public'), '|', ('project_id.lead_researcher_id.user_id', '=', user.id), ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('project_id.visibility', '=', 'public'),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_requirement_manager_global" model="ir.rule">
-        <field name="name">Requirements: Manager Global Access</field>
+    <record id="rule_requirement_owner_write" model="ir.rule">
+        <field name="name">Requirement: Owner Write (must remain a project member)</field>
         <field name="model_id" ref="model_research_requirement"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_researcher'))]"/>
+        <field name="domain_force">
+            ['&amp;', ('owner_id', '=', user.id),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_requirement_manager_read_all" model="ir.rule">
+        <field name="name">Requirement: Manager Organisation-Wide Read</field>
+        <field name="model_id" ref="model_research_requirement"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_requirement_admin_bypass" model="ir.rule">
+        <field name="name">Requirement: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_requirement"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -151,20 +422,48 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Research Resource Rules -->
-    <record id="rule_research_resource_user" model="ir.rule">
-        <field name="name">Research Resource: Project Access</field>
+
+    <!-- ========================================================================
+         RESOURCE (research.resource)
+         Ownership is PROJECT-based (owner_project_id), not personal - it is
+         inventory, not authored work. Resource Officer is the primary
+         functional owner org-wide; a Lead may create/manage resources that
+         belong to their own project.
+         ==================================================================== -->
+
+    <record id="rule_resource_read" model="ir.rule">
+        <field name="name">Resource: Visibility (unowned pool or project scope)</field>
         <field name="model_id" ref="model_research_resource"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('owner_project_id', '=', False), '|', ('owner_project_id.visibility', '=', 'public'), '|', ('owner_project_id.lead_researcher_id.user_id', '=', user.id), ('owner_project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('owner_project_id', '=', False),
+             '|', ('owner_project_id.visibility', '=', 'public'),
+             '|', ('owner_project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('owner_project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_research_resource_manager_global" model="ir.rule">
-        <field name="name">Research Resource: Manager Global Access</field>
+    <record id="rule_resource_lead_manage_own_project" model="ir.rule">
+        <field name="name">Resource: Lead Manages Own Project's Resources</field>
         <field name="model_id" ref="model_research_resource"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_research_lead'))]"/>
+        <field name="domain_force">
+            [('owner_project_id.lead_researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_resource_officer_manage" model="ir.rule">
+        <field name="name">Resource: Resource Officer Organisation-Wide (functional owner)</field>
+        <field name="model_id" ref="model_research_resource"/>
+        <field name="groups" eval="[(4, ref('group_research_resource_officer'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -172,20 +471,79 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Output Rules -->
-    <record id="rule_output_project_access" model="ir.rule">
-        <field name="name">Outputs: Project Access</field>
+    <record id="rule_resource_manager_read_all" model="ir.rule">
+        <field name="name">Resource: Manager Organisation-Wide Read</field>
+        <field name="model_id" ref="model_research_resource"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_resource_admin_bypass" model="ir.rule">
+        <field name="name">Resource: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_resource"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+
+    <!-- ========================================================================
+         OUTPUT
+         Ownership anchor: owner_id.
+         ==================================================================== -->
+
+    <record id="rule_output_read" model="ir.rule">
+        <field name="name">Output: Visibility (mirrors project scope)</field>
         <field name="model_id" ref="model_research_output"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('project_id.visibility', '=', 'public'), '|', ('project_id.lead_researcher_id.user_id', '=', user.id), ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('project_id.visibility', '=', 'public'),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_output_manager_global" model="ir.rule">
-        <field name="name">Outputs: Manager Global Access</field>
+    <record id="rule_output_owner_write" model="ir.rule">
+        <field name="name">Output: Owner Write (must remain a project member)</field>
         <field name="model_id" ref="model_research_output"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_researcher'))]"/>
+        <field name="domain_force">
+            ['&amp;', ('owner_id', '=', user.id),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_output_manager_read_all" model="ir.rule">
+        <field name="name">Output: Manager Organisation-Wide Read</field>
+        <field name="model_id" ref="model_research_output"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_output_admin_bypass" model="ir.rule">
+        <field name="name">Output: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_output"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -193,20 +551,61 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Paper Rules -->
-    <record id="rule_research_paper_user" model="ir.rule">
-        <field name="name">Research Paper: Project Access</field>
+
+    <!-- ========================================================================
+         PAPER
+         Ownership anchor: owner_id. Orphaned papers (project_id = False)
+         remain read-only to everyone except Manager/Admin, closing the
+         "unowned paper" loophole from the previous design.
+         ==================================================================== -->
+
+    <record id="rule_paper_read" model="ir.rule">
+        <field name="name">Paper: Visibility (mirrors project scope, orphans locked)</field>
         <field name="model_id" ref="model_research_paper"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('project_id', '=', False), '|', ('project_id.visibility', '=', 'public'), '|', ('project_id.lead_researcher_id.user_id', '=', user.id), ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('project_id', '=', False),
+             '|', ('project_id.visibility', '=', 'public'),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
-    <record id="rule_research_paper_manager_global" model="ir.rule">
-        <field name="name">Research Paper: Manager Global Access</field>
+    <record id="rule_paper_owner_write" model="ir.rule">
+        <field name="name">Paper: Owner Write (must remain a project member, or unattached)</field>
         <field name="model_id" ref="model_research_paper"/>
-        <field name="groups" eval="[(4, ref('group_research_manager')), (4, ref('group_research_admin'))]"/>
+        <field name="groups" eval="[(4, ref('group_researcher'))]"/>
+        <field name="domain_force">
+            ['&amp;', ('owner_id', '=', user.id),
+             '|', ('project_id', '=', False),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_paper_manager_read_all" model="ir.rule">
+        <field name="name">Paper: Manager Organisation-Wide Read</field>
+        <field name="model_id" ref="model_research_paper"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_paper_admin_bypass" model="ir.rule">
+        <field name="name">Paper: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_paper"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
@@ -214,13 +613,103 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
-    <!-- Budget Rules -->
-    <record id="rule_budget_project_access" model="ir.rule">
-        <field name="name">Project Budgets: Project Access</field>
+
+    <!-- ========================================================================
+         PROJECT BUDGET
+         PROJECT-owned financial data, not personally owned. Segregation of
+         duties: only Finance Officer, Research Manager and Administrator
+         may write. A Project Lead may READ their own project's budget but
+         may NOT alter figures - owning the project does not confer
+         financial authority.
+         ==================================================================== -->
+
+    <record id="rule_budget_read" model="ir.rule">
+        <field name="name">Budget: Visibility (mirrors project scope, read only)</field>
         <field name="model_id" ref="model_project_budget"/>
         <field name="groups" eval="[(4, ref('group_research_user'))]"/>
         <field name="domain_force">
-            ['|', ('project_id.visibility', '=', 'public'), '|', ('project_id.lead_researcher_id.user_id', '=', user.id), ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
+            ['|', ('project_id.visibility', '=', 'public'),
+             '|', ('project_id.lead_researcher_id.user_id', '=', user.id),
+                  ('project_id.researcher_line_ids.researcher_id.user_id', '=', user.id)]
         </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
+
+    <record id="rule_budget_finance_manage" model="ir.rule">
+        <field name="name">Budget: Finance Officer Organisation-Wide (functional owner)</field>
+        <field name="model_id" ref="model_project_budget"/>
+        <field name="groups" eval="[(4, ref('group_research_finance'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_budget_manager_manage" model="ir.rule">
+        <field name="name">Budget: Manager Organisation-Wide (functional exception)</field>
+        <field name="model_id" ref="model_project_budget"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_budget_admin_bypass" model="ir.rule">
+        <field name="name">Budget: Administrator Bypass</field>
+        <field name="model_id" ref="model_project_budget"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+
+    <!-- ========================================================================
+         RESEARCHER PROFILE
+         Ownership anchor: user_id (a user's own profile). is_principal and
+         employee_id remain field-level restricted to Manager/Admin in
+         researcher.py - unaffected by this rewrite.
+         ==================================================================== -->
+
+    <record id="rule_researcher_self_write" model="ir.rule">
+        <field name="name">Researcher Profile: Self Only (Write)</field>
+        <field name="model_id" ref="model_research_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_user'))]"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_researcher_manager_manage" model="ir.rule">
+        <field name="name">Researcher Profile: Manager Organisation-Wide (functional exception)</field>
+        <field name="model_id" ref="model_research_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_researcher_admin_bypass" model="ir.rule">
+        <field name="name">Researcher Profile: Administrator Bypass</field>
+        <field name="model_id" ref="model_research_researcher"/>
+        <field name="groups" eval="[(4, ref('group_research_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
 </odoo>

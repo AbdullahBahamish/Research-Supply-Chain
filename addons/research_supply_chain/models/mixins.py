@@ -80,9 +80,6 @@ class ResearchAuditMixin(models.AbstractModel):
     # Weakly private attribute convention
     _protected_audit_counter = 0
 
-    # Strongly private attribute (Name Mangling active)
-    __secret_system_token = "RSC-SECURE-KEY-2026"
-
     audit_notes = fields.Text(
         string="Audit History",
         readonly=True,
@@ -108,10 +105,6 @@ class ResearchAuditMixin(models.AbstractModel):
             updated_lines = [new_entry] + log_lines[:29]
             record.audit_notes = "\n".join(updated_lines) + "\n"
 
-
-    def get_security_token(self) -> str:
-        """Data hiding method accessing strongly private attribute."""
-        return self.__secret_system_token
 
     @classmethod
     def increment_audit_counter(cls):

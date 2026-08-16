@@ -6,6 +6,39 @@ from odoo.exceptions import AccessError, ValidationError, UserError  # type: ign
 
 _logger = logging.getLogger(__name__)
 
+# ── Explicit allow-lists ────────────────────────────────────────────────────
+# Never forward a raw client-supplied `domain` or `vals` dict straight into
+# search_read()/create(). Record rules bound *which rows* a caller can touch,
+# but they do nothing to bound *which fields* a caller can filter on or set -
+# that's on us. A caller could otherwise pass domain leaves that traverse
+# unrelated related-field paths (a "domain injection" / boolean-oracle probe),
+# or slip extra keys into `vals` on create (classic mass-assignment).
+PROJECT_SEARCH_FIELDS = {"project_status", "code", "lead_researcher_id", "visibility", "tag_ids"}
+PROJECT_CREATE_FIELDS = {
+    "project_name", "project_description", "lead_researcher_id",
+    "start_date", "end_date", "project_status", "visibility", "tag_ids",
+}
+
+
+def _build_safe_domain(filters: dict, allowed_fields: set) -> list:
+    """Build a search domain only from whitelisted simple equality filters.
+    Rejects anything that isn't a flat {field: value} mapping on an allowed
+    field - no raw domain leaves, no operators, no dotted/related paths."""
+    domain = []
+    for key, value in (filters or {}).items():
+        if key not in allowed_fields:
+            raise ValidationError(f"Filtering on '{key}' is not permitted.")
+        domain.append((key, "=", value))
+    return domain
+
+
+def _sanitize_vals(vals: dict, allowed_fields: set) -> dict:
+    """Drop any key not on the explicit allow-list before it reaches create()/write()."""
+    if not isinstance(vals, dict):
+        raise ValidationError("vals must be an object.")
+    return {k: v for k, v in vals.items() if k in allowed_fields}
+
+
 class ResearchSupplyChainAPIController(http.Controller):
 
     @http.route('/api/v1/projects', type='json', auth='user', methods=['POST'], csrf=False)
@@ -14,7 +47,8 @@ class ResearchSupplyChainAPIController(http.Controller):
         Fetch list of research projects with pagination and error handling.
         """
         try:
-            domain = kw.get('domain', [])
+            filters = kw.get('filters', {})
+            domain = _build_safe_domain(filters, PROJECT_SEARCH_FIELDS)
             limit = min(kw.get('limit', 80), 200)
             offset = kw.get('offset', 0)
             raw_projects = request.env['research.project'].search_read(
@@ -51,10 +85,10 @@ class ResearchSupplyChainAPIController(http.Controller):
     def api_create_project(self, **kw):
         """Create a new research project record safely."""
         try:
-            vals = kw.get('vals', {})
+            vals = _sanitize_vals(kw.get('vals', {}), PROJECT_CREATE_FIELDS)
             if not vals.get('project_name'):
                 return {'status': 400, 'error': 'Field project_name is required.'}
-            
+
             project = request.env['research.project'].create(vals)
             return {
                 'status': 201,
@@ -76,17 +110,29 @@ class ResearchSupplyChainAPIController(http.Controller):
 
     @http.route('/api/v1/researchers', type='json', auth='user', methods=['POST'], csrf=False)
     def api_get_researchers(self, **kw):
-        """Fetch list of active researchers with pagination."""
+        """Fetch list of active researchers with pagination.
+
+        NOTE: 'email' is intentionally excluded. research.researcher has no
+        record rule at all - every authenticated user (down to plain Viewer)
+        gets read access to every row via the base ACL - so this endpoint was
+        previously handing out every researcher's email address to anyone
+        with a login. Directory-style fields (name/position/expertise) are
+        fine to expose broadly; email is not, until a proper record rule
+        scopes visibility. See SECURITY_AUDIT_AND_PLAN.md, Finding on
+        research.researcher visibility.
+        """
         try:
             limit = min(kw.get('limit', 80), 200)
             offset = kw.get('offset', 0)
             researchers = request.env['research.researcher'].search_read(
                 domain=[],
-                fields=['name', 'email', 'position', 'expertise', 'is_principal'],
+                fields=['name', 'position', 'expertise', 'is_principal'],
                 limit=limit,
                 offset=offset,
             )
             return {'status': 200, 'count': len(researchers), 'offset': offset, 'limit': limit, 'data': researchers}
+        except AccessError as e:
+            return {'status': 403, 'error': str(e)}
         except Exception as e:
             _logger.exception("API Error in api_get_researchers")
             return {'status': 500, 'error': 'Internal server error'}

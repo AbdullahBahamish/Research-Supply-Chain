@@ -31,6 +31,17 @@ class ResearchRequirement(models.Model):
         string="Requirement Name",
         required=True,
     )
+    owner_id = fields.Many2one(
+        "res.users",
+        string="Owner",
+        default=lambda self: self.env.user,
+        index=True,
+        help=(
+            "The researcher who raised this requirement. Defaults to its "
+            "creator. Only the owner (or a Research Manager/Administrator) "
+            "may modify or delete this record."
+        ),
+    )
     product_id = fields.Many2one(
         "product.product",
         string="Catalog Product",
@@ -153,4 +164,48 @@ class ResearchRequirement(models.Model):
             if req.priority != "high":
                 req.priority = "high"
 
+        return True
+
+    def action_approve(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status != "requested":
+                continue
+            record.status = "approved"
+            if hasattr(record, "_log_system_event"):
+                record._log_system_event(f"Requirement '{record.name}' approved for project procurement.")
+        return True
+
+    def action_fulfill(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status != "approved":
+                continue
+            record.status = "fulfilled"
+            if hasattr(record, "_log_system_event"):
+                record._log_system_event(f"Requirement '{record.name}' marked as fulfilled.")
+        return True
+
+    def action_cancel(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status in ["fulfilled", "cancelled"]:
+                continue
+            record.status = "cancelled"
+            if hasattr(record, "_log_system_event"):
+                record._log_system_event(f"Requirement '{record.name}' cancelled.")
+        return True
+
+    def action_reset_draft(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status != "cancelled":
+                continue
+            record.status = "requested"
+            if hasattr(record, "_log_system_event"):
+                record._log_system_event(f"Requirement '{record.name}' reset to requested state.")
         return True

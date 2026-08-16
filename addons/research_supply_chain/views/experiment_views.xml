@@ -8,6 +8,9 @@
         <field name="arch" type="xml">
             <form string="Research Experiment">
                 <header>
+                    <button name="action_start" type="object" string="Start Experiment" class="oe_highlight" invisible="status != 'planned'"/>
+                    <button name="action_complete" type="object" string="Complete Experiment" class="oe_highlight" invisible="status != 'running'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="status in ('completed', 'cancelled')" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                     <field name="status" widget="statusbar" statusbar_visible="planned,running,completed,cancelled"/>
                 </header>
                 <sheet>
@@ -16,30 +19,30 @@
 
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="e.g. Experiment #101: Superconducting Qubit Coherence Test"/>
+                            <field name="name" placeholder="e.g. Experiment #101: Superconducting Qubit Coherence Test" readonly="status in ('completed', 'cancelled')"/>
                         </h1>
                     </div>
 
                     <group>
                         <group string="General Information">
-                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="project_id" options="{'no_create': True}" readonly="status in ('completed', 'cancelled')"/>
                             <field name="create_uid" string="Created By" readonly="1"/>
                         </group>
                         <group string="Schedule">
-                            <field name="start_date"/>
-                            <field name="end_date"/>
+                            <field name="start_date" readonly="status in ('completed', 'cancelled')"/>
+                            <field name="end_date" readonly="status in ('completed', 'cancelled')"/>
                         </group>
                     </group>
 
                     <notebook>
                         <page string="Objective &amp; Methodology">
                             <group>
-                                <field name="objective" placeholder="Primary hypothesis and scientific goals..."/>
-                                <field name="methodology" placeholder="Detailed experimental procedures, control parameters, and test protocols..."/>
+                                <field name="objective" placeholder="Primary hypothesis and scientific goals..." readonly="status in ('completed', 'cancelled')"/>
+                                <field name="methodology" placeholder="Detailed experimental procedures, control parameters, and test protocols..." readonly="status in ('completed', 'cancelled')"/>
                             </group>
                         </page>
                         <page string="Used Resources">
-                            <field name="experiment_resource_ids">
+                            <field name="experiment_resource_ids" readonly="status in ('completed', 'cancelled')">
                                 <list editable="bottom">
                                     <field name="resource_id"/>
                                     <field name="purpose"/>
@@ -48,7 +51,7 @@
                             </field>
                         </page>
                         <page string="Produced Outputs">
-                            <field name="output_ids">
+                            <field name="output_ids" readonly="status in ('completed', 'cancelled')">
                                 <list editable="bottom">
                                     <field name="name"/>
                                     <field name="output_type"/>
@@ -70,7 +73,7 @@
         <field name="name">research.experiment.list</field>
         <field name="model">research.experiment</field>
         <field name="arch" type="xml">
-            <list string="Experiments" multi_edit="1">
+            <list string="Experiments">
                 <field name="name"/>
                 <field name="project_id"/>
                 <field name="start_date"/>
@@ -127,7 +130,7 @@
         </field>
     </record>
 
-    <!-- Experiment Pivot View (Leads, Managers, Owners, Admins) -->
+    <!-- Experiment Pivot View -->
     <record id="view_experiment_pivot" model="ir.ui.view">
         <field name="name">research.experiment.pivot</field>
         <field name="model">research.experiment</field>
@@ -139,7 +142,7 @@
         </field>
     </record>
 
-    <!-- Experiment Graph View (Leads, Managers, Owners, Admins) -->
+    <!-- Experiment Graph View -->
     <record id="view_experiment_graph" model="ir.ui.view">
         <field name="name">research.experiment.graph</field>
         <field name="model">research.experiment</field>

@@ -37,6 +37,17 @@ class ResearchOutput(models.Model):
         string="Title",
         required=True,
     )
+    owner_id = fields.Many2one(
+        "res.users",
+        string="Owner",
+        default=lambda self: self.env.user,
+        index=True,
+        help=(
+            "The researcher responsible for this output. Defaults to its "
+            "creator. Only the owner (or a Research Manager/Administrator) "
+            "may modify or delete this record."
+        ),
+    )
     description = fields.Text(
         string="Description",
     )

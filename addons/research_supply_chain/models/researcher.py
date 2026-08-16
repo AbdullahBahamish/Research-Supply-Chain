@@ -22,6 +22,10 @@ class Researcher(models.Model):
         string="HR Employee",
         ondelete="set null",
         help="Linked standard Odoo HR Employee profile.",
+        # Field-level ACL: HR linkage is admin/manager territory only. This is
+        # enforced at the ORM layer (not just the view), so it can't be
+        # bypassed by calling write()/create() directly (e.g. via RPC/API).
+        groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin",
     )
     name = fields.Char(
         related="user_id.name",
@@ -44,6 +48,13 @@ class Researcher(models.Model):
     is_principal = fields.Boolean(
         string="Is Principal Investigator",
         default=False,
+        # Field-level ACL: a researcher must never be able to self-declare as
+        # PI. This matters now that researchers can write their own profile
+        # (rule_researcher_self_write) - without this, that self-write ability
+        # would let any researcher flip this flag on themselves. Restricting
+        # at the field level (not just hiding it in the view) blocks that
+        # regardless of whether the write comes through the UI or the API.
+        groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin",
     )
     active = fields.Boolean(
         default=True,

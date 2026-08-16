@@ -17,11 +17,11 @@
                     <group>
                         <group string="Budget Allocation">
                             <field name="total_amount" widget="monetary"/>
-                            <field name="spent_amount" widget="monetary"/>
-                            <field name="remaining_amount" widget="monetary"/>
+                            <field name="spent_amount" widget="monetary" readonly="1"/>
+                            <field name="remaining_amount" widget="monetary" readonly="1"/>
                         </group>
                         <group string="Accounting &amp; Schedule">
-                            <field name="analytic_account_id"/>
+                            <field name="analytic_account_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="start_date"/>
                             <field name="end_date"/>
@@ -43,20 +43,22 @@
         <field name="name">project.budget.list</field>
         <field name="model">project.budget</field>
         <field name="arch" type="xml">
-            <list string="Project Budgets" multi_edit="1">
+            <list string="Project Budgets">
                 <field name="project_id"/>
-                <field name="analytic_account_id"/>
+                <field name="analytic_account_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                 <field name="total_amount"
                     widget="monetary"
-                    groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
 
                 <field name="spent_amount"
                     widget="monetary"
-                    groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    readonly="1"
+                    groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
 
                 <field name="remaining_amount"
                     widget="monetary"
-                    groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    readonly="1"
+                    groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
             </list>
@@ -106,7 +108,7 @@
         </field>
     </record>
 
-    <!-- Project Budget Pivot View (Financial Analytics - Managers & Admins) -->
+    <!-- Project Budget Pivot View -->
     <record id="view_project_budget_pivot" model="ir.ui.view">
         <field name="name">project.budget.pivot</field>
         <field name="model">project.budget</field>
@@ -120,7 +122,7 @@
         </field>
     </record>
 
-    <!-- Project Budget Graph View (Financial Analytics - Managers & Admins) -->
+    <!-- Project Budget Graph View -->
     <record id="view_project_budget_graph" model="ir.ui.view">
         <field name="name">project.budget.graph</field>
         <field name="model">project.budget</field>

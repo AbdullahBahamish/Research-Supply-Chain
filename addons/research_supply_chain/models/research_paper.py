@@ -53,6 +53,18 @@ class ResearchPaper(models.Model):
         string="Research Project",
         ondelete="set null",
     )
+    owner_id = fields.Many2one(
+        "res.users",
+        string="Owner",
+        default=lambda self: self.env.user,
+        index=True,
+        tracking=True,
+        help=(
+            "The researcher responsible for this paper. Defaults to its "
+            "creator. Only the owner (or a Research Manager/Administrator) "
+            "may modify or delete this record."
+        ),
+    )
     output_id = fields.Many2one(
         "research.output",
         string="Research Output",
@@ -133,6 +145,36 @@ class ResearchPaper(models.Model):
                 continue
             record.paper_status = "submitted"
             record._log_system_event(f"Paper '{record.paper_name}' submitted for publication review.")
+        return True
+
+    def action_publish(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.paper_status not in ["submitted", "draft"]:
+                continue
+            if not record.paper_publication_date:
+                record.paper_publication_date = fields.Date.context_today(record)
+            record.paper_status = "published"
+            record._log_system_event(f"Paper '{record.paper_name}' published.")
+        return True
+
+    def action_archive(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.paper_status == "archived":
+                continue
+            record.paper_status = "archived"
+            record._log_system_event(f"Paper '{record.paper_name}' archived.")
+        return True
+
+    def action_reset_draft(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            record.paper_status = "draft"
+            record._log_system_event(f"Paper '{record.paper_name}' reset to draft state.")
         return True
 
     @api.model

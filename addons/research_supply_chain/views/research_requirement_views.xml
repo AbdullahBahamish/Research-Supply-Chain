@@ -8,6 +8,10 @@
         <field name="arch" type="xml">
             <form string="Research Requirement">
                 <header>
+                    <button name="action_approve" type="object" string="Approve Requirement" class="oe_highlight" invisible="status != 'requested'" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_fulfill" type="object" string="Mark as Fulfilled" class="oe_highlight" invisible="status != 'approved'" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="status in ('fulfilled', 'cancelled')" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Requested" invisible="status != 'cancelled'" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                     <field name="status" widget="statusbar" statusbar_visible="requested,approved,fulfilled,cancelled"/>
                 </header>
                 <sheet>
@@ -16,31 +20,31 @@
 
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="e.g. High-Performance GPU Cluster Allocation"/>
+                            <field name="name" placeholder="e.g. High-Performance GPU Cluster Allocation" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
                         </h1>
                     </div>
 
                     <group>
                         <group string="Classification &amp; Quantity">
-                            <field name="category"/>
-                            <field name="product_id" options="{'no_create': True}"/>
-                            <field name="quantity"/>
-                            <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'"/>
+                            <field name="category" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
+                            <field name="product_id" options="{'no_create': True}" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
+                            <field name="quantity" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
+                            <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
                         </group>
                         <group string="Project &amp; Schedule">
-                            <field name="project_id" options="{'no_create': True}"/>
-                            <field name="parent_id" domain="[('project_id', '=', project_id)]"/>
-                            <field name="requested_date"/>
-                            <field name="needed_by"/>
+                            <field name="project_id" options="{'no_create': True}" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
+                            <field name="parent_id" domain="[('project_id', '=', project_id)]" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
+                            <field name="requested_date" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
+                            <field name="needed_by" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
                         </group>
                     </group>
 
                     <notebook>
                         <page string="Description">
-                            <field name="description" placeholder="Technical specifications, requirements details, and fulfillment guidelines..."/>
+                            <field name="description" placeholder="Technical specifications, requirements details, and fulfillment guidelines..." readonly="status in ('fulfilled', 'cancelled')"/>
                         </page>
                         <page string="Child Requirements">
-                            <field name="child_ids">
+                            <field name="child_ids" readonly="status in ('fulfilled', 'cancelled')">
                                 <list editable="bottom">
                                     <field name="name"/>
                                     <field name="category"/>
@@ -61,7 +65,7 @@
         <field name="name">research.requirement.list</field>
         <field name="model">research.requirement</field>
         <field name="arch" type="xml">
-            <list string="Research Requirements" multi_edit="1">
+            <list string="Research Requirements">
                 <field name="name"/>
                 <field name="category"/>
                 <field name="product_id"/>
@@ -119,7 +123,7 @@
         </field>
     </record>
 
-    <!-- Research Requirement Pivot View (Leads, Managers, Owners, Admins) -->
+    <!-- Research Requirement Pivot View -->
     <record id="view_research_requirement_pivot" model="ir.ui.view">
         <field name="name">research.requirement.pivot</field>
         <field name="model">research.requirement</field>
@@ -132,7 +136,7 @@
         </field>
     </record>
 
-    <!-- Research Requirement Graph View (Leads, Managers, Owners, Admins) -->
+    <!-- Research Requirement Graph View -->
     <record id="view_research_requirement_graph" model="ir.ui.view">
         <field name="name">research.requirement.graph</field>
         <field name="model">research.requirement</field>

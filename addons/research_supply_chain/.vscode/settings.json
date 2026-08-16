@@ -1,4 +1,5 @@
 {
     "xml.symbols.enabled": false,
-    "python.languageServer": "None"
+    "python.languageServer": "None",
+    "Odoo.selectedProfile": "default"
 }

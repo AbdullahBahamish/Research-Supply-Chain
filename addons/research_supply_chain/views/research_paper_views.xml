@@ -8,7 +8,10 @@
         <field name="arch" type="xml">
             <form string="Research Paper">
                 <header>
-                    <button name="action_submit" type="object" string="Submit Paper" class="oe_highlight" invisible="paper_status != 'draft'"  groups="research_supply_chain.group_researcher,research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_submit" type="object" string="Submit Paper" class="oe_highlight" invisible="paper_status != 'draft'" groups="research_supply_chain.group_researcher,research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_publish" type="object" string="Publish Paper" class="oe_highlight" invisible="paper_status != 'submitted'" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_archive" type="object" string="Archive Paper" invisible="paper_status == 'archived'" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft" invisible="paper_status != 'archived'" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                     <field name="paper_status" widget="statusbar" statusbar_visible="draft,submitted,published,archived"/>
                 </header>
                 <sheet>
@@ -16,26 +19,26 @@
 
                     <div class="oe_title">
                         <h1>
-                            <field name="paper_name" placeholder="Title of the Scientific Paper..."/>
+                            <field name="paper_name" placeholder="Title of the Scientific Paper..." readonly="paper_status in ('published', 'archived')"/>
                         </h1>
                         <h2>
-                            <field name="paper_author" placeholder="Author(s) (e.g. Dr. Jane Doe, Prof. Alan Turing)"/>
+                            <field name="paper_author" placeholder="Author(s) (e.g. Dr. Jane Doe, Prof. Alan Turing)" readonly="paper_status in ('published', 'archived')"/>
                         </h2>
                     </div>
 
                     <group>
                         <group string="Project &amp; DOI">
-                            <field name="project_id" options="{'no_create': True}"/>
-                            <field name="paper_doi" placeholder="e.g. 10.1038/s41586-023-00000-x"/>
+                            <field name="project_id" options="{'no_create': True}" readonly="paper_status in ('published', 'archived')"/>
+                            <field name="paper_doi" placeholder="e.g. 10.1038/s41586-023-00000-x" readonly="paper_status in ('published', 'archived')"/>
                         </group>
                         <group string="Publication Metadata">
-                            <field name="paper_publication_date"/>
+                            <field name="paper_publication_date" readonly="paper_status in ('published', 'archived')"/>
                         </group>
                     </group>
 
                     <notebook>
                         <page string="Abstract &amp; Summary">
-                            <field name="paper_abstract" placeholder="Full paper abstract, key findings, and summary..."/>
+                            <field name="paper_abstract" placeholder="Full paper abstract, key findings, and summary..." readonly="paper_status in ('published', 'archived')"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -51,7 +54,7 @@
         <field name="name">research.paper.list</field>
         <field name="model">research.paper</field>
         <field name="arch" type="xml">
-            <list string="Research Papers" multi_edit="1">
+            <list string="Research Papers">
                 <field name="paper_name"/>
                 <field name="paper_author"/>
                 <field name="project_id"/>

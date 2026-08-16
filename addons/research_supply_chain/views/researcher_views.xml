@@ -22,12 +22,12 @@
 
                     <group>
                         <group string="Account &amp; HR Mapping">
-                            <field name="user_id" readonly="id != False" options="{'no_create': True}"/>
+                            <field name="user_id" readonly="id != False" options="{'no_create': True}" groups="research_supply_chain.group_research_admin"/>
                             <field name="employee_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                             <field name="email"/>
                         </group>
                         <group string="Role &amp; Status">
-                            <field name="is_principal"/>
+                            <field name="is_principal" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
@@ -50,13 +50,13 @@
         <field name="name">research.researcher.list</field>
         <field name="model">research.researcher</field>
         <field name="arch" type="xml">
-            <list string="Researchers" multi_edit="1">
+            <list string="Researchers">
                 <field name="name"/>
-                <field name="user_id"/>
-                <field name="employee_id"/>
+                <field name="user_id" groups="research_supply_chain.group_research_admin"/>
+                <field name="employee_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                 <field name="email"/>
                 <field name="position"/>
-                <field name="is_principal"/>
+                <field name="is_principal" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
             </list>
         </field>
     </record>
@@ -125,5 +125,4 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_researcher_search"/>
     </record>
-
 </odoo>

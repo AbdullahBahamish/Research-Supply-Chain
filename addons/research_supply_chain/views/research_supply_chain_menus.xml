@@ -98,13 +98,13 @@
         sequence="20"
     />
 
-    <!-- Finance Category (Restricted to Research Managers and Administrators) -->
+    <!-- Finance Category -->
     <menuitem
         id="menu_finance"
         name="Finance"
         parent="menu_research_supply_chain_root"
         sequence="50"
-        groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
+        groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
     />
     <menuitem
         id="menu_project_budget"
@@ -112,10 +112,10 @@
         parent="menu_finance"
         action="action_project_budget"
         sequence="10"
-        groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
+        groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
     />
 
-    <!-- Tools Category (Restricted to Administrator) -->
+    <!-- Tools Category -->
     <menuitem
         id="menu_tools"
         name="Tools"

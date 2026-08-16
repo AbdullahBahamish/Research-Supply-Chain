@@ -29,7 +29,7 @@
                                 <span class="o_stat_text">Papers</span>
                             </div>
                         </button>
-                        <button class="oe_stat_button" icon="fa-pie-chart" type="action" name="%(action_project_budget)d" context="{'search_default_project_id': id}" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
+                        <button class="oe_stat_button" icon="fa-pie-chart" type="action" name="%(action_project_budget)d" context="{'search_default_project_id': id}" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
                             <div class="o_stat_info">
                                 <field name="budget_utilization" widget="statinfo" string="Utilization"/>
                             </div>
@@ -41,42 +41,42 @@
                             <field name="code" readonly="1"/>
                         </h1>
                         <h2 class="mt-2">
-                            <field name="project_name" placeholder="e.g. Quantum Computing Supply Chain Optimization"/>
+                            <field name="project_name" placeholder="e.g. Quantum Computing Supply Chain Optimization" readonly="project_status in ('completed', 'archived')"/>
                         </h2>
                     </div>
 
                     <group>
                         <group string="Project Information">
-                            <field name="lead_researcher_id" options="{'no_create': True}"/>
-                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                            <field name="visibility" widget="badge" decoration-info="visibility == 'public'" decoration-warning="visibility == 'private'"/>
+                            <field name="lead_researcher_id" options="{'no_create': True}" readonly="project_status in ('completed', 'archived')" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" readonly="project_status in ('completed', 'archived')"/>
+                            <field name="visibility" widget="badge" decoration-info="visibility == 'public'" decoration-warning="visibility == 'private'" readonly="project_status in ('completed', 'archived')" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                             <field name="active" invisible="1"/>
                         </group>
                         <group string="Schedule &amp; Financials">
-                            <field name="start_date"/>
-                            <field name="end_date"/>
-                            <field name="analytic_account_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                            <field name="start_date" readonly="project_status in ('completed', 'archived')"/>
+                            <field name="end_date" readonly="project_status in ('completed', 'archived')"/>
+                            <field name="analytic_account_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin" readonly="project_status in ('completed', 'archived')"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
 
-                    <group string="Financial Summary" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
+                    <group string="Financial Summary" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
                         <group>
-                            <field name="total_budget_amount" widget="monetary"/>
-                            <field name="total_spent_amount" widget="monetary"/>
+                            <field name="total_budget_amount" widget="monetary" readonly="1"/>
+                            <field name="total_spent_amount" widget="monetary" readonly="1"/>
                         </group>
                         <group>
-                            <field name="remaining_budget_amount" widget="monetary"/>
-                            <field name="budget_utilization" widget="progressbar"/>
+                            <field name="remaining_budget_amount" widget="monetary" readonly="1"/>
+                            <field name="budget_utilization" widget="progressbar" readonly="1"/>
                         </group>
                     </group>
 
                     <notebook>
                         <page string="Description">
-                            <field name="project_description" placeholder="Detailed project scope, goals, and methodologies..."/>
+                            <field name="project_description" placeholder="Detailed project scope, goals, and methodologies..." readonly="project_status in ('completed', 'archived')"/>
                         </page>
                         <page string="Team Members">
-                            <field name="researcher_line_ids">
+                            <field name="researcher_line_ids" readonly="project_status in ('completed', 'archived')">
                                 <list editable="bottom">
                                     <field name="researcher_id"/>
                                     <field name="role"/>
@@ -85,25 +85,25 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Budgets" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
-                            <field name="budget_ids">
+                        <page string="Budgets" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
+                            <field name="budget_ids" readonly="project_status in ('completed', 'archived')">
                                 <list editable="bottom">
                                     <field name="total_amount" widget="monetary"/>
-                                    <field name="spent_amount" widget="monetary"/>
-                                    <field name="remaining_amount" widget="monetary"/>
+                                    <field name="spent_amount" widget="monetary" readonly="1"/>
+                                    <field name="remaining_amount" widget="monetary" readonly="1"/>
                                     <field name="start_date"/>
                                     <field name="end_date"/>
                                 </list>
                             </field>
                         </page>
                         <page string="Requirements">
-                            <field name="requirement_ids"/>
+                            <field name="requirement_ids" readonly="project_status in ('completed', 'archived')"/>
                         </page>
                         <page string="Experiments">
-                            <field name="experiment_ids"/>
+                            <field name="experiment_ids" readonly="project_status in ('completed', 'archived')"/>
                         </page>
                         <page string="Research Papers">
-                            <field name="paper_ids"/>
+                            <field name="paper_ids" readonly="project_status in ('completed', 'archived')"/>
                         </page>
                         <page string="System Audit Trail" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
                             <field name="audit_notes" readonly="1"/>
@@ -120,15 +120,15 @@
         <field name="name">research.project.list</field>
         <field name="model">research.project</field>
         <field name="arch" type="xml">
-            <list string="Research Projects" multi_edit="1">
+            <list string="Research Projects">
                 <field name="code"/>
                 <field name="project_name"/>
                 <field name="lead_researcher_id"/>
                 <field name="visibility" widget="badge" decoration-info="visibility == 'public'" decoration-warning="visibility == 'private'"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="total_budget_amount" widget="monetary" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
-                <field name="budget_utilization" widget="progressbar" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                <field name="total_budget_amount" widget="monetary" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+                <field name="budget_utilization" widget="progressbar" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                 <field name="project_status" widget="badge" decoration-info="project_status in ('proposed', 'approved')" decoration-warning="project_status == 'in_progress'" decoration-success="project_status == 'completed'" decoration-muted="project_status == 'archived'"/>
             </list>
         </field>
@@ -161,7 +161,7 @@
                             <i class="fa fa-user me-1" title="Lead Researcher"/> <field name="lead_researcher_id"/>
                             <span class="badge bg-light text-dark border ms-2"><field name="visibility"/></span>
                         </div>
-                        <div class="mb-2" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
+                        <div class="mb-2" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
                             <small class="text-muted">Budget Utilization:</small>
                             <field name="budget_utilization" widget="progressbar"/>
                         </div>
@@ -174,7 +174,7 @@
                                     <i class="fa fa-file-text-o text-success me-1"/> <t t-esc="record.paper_count.raw_value"/> Papers
                                 </span>
                             </div>
-                            <div class="oe_kanban_bottom_right" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
+                            <div class="oe_kanban_bottom_right" groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin">
                                 <strong class="text-nowrap">
                                     <field name="total_budget_amount" widget="monetary"/>
                                 </strong>

@@ -20,6 +20,19 @@ class Experiment(models.Model):
         required=True,
         tracking=True,
     )
+    owner_id = fields.Many2one(
+        "res.users",
+        string="Owner",
+        default=lambda self: self.env.user,
+        index=True,
+        tracking=True,
+        help=(
+            "The researcher responsible for this experiment. Defaults to "
+            "its creator. Only the owner (or a Research Manager/"
+            "Administrator) may modify or delete this record - see "
+            "research_security.xml."
+        ),
+    )
     objective = fields.Text(
         string="Objective",
     )
@@ -157,4 +170,41 @@ class Experiment(models.Model):
         for exp in starting_experiments:
             exp.status = "running"
 
+        return True
+
+    def action_start(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status != "planned":
+                continue
+            if not record.start_date:
+                record.start_date = fields.Date.context_today(record)
+            record.status = "running"
+            if hasattr(record, "message_post"):
+                record.message_post(body=f"Experiment '{record.name}' started.")
+        return True
+
+    def action_complete(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status != "running":
+                continue
+            if not record.end_date:
+                record.end_date = fields.Date.context_today(record)
+            record.status = "completed"
+            if hasattr(record, "message_post"):
+                record.message_post(body=f"Experiment '{record.name}' marked as completed.")
+        return True
+
+    def action_cancel(self):
+        for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
+            if record.status in ["completed", "cancelled"]:
+                continue
+            record.status = "cancelled"
+            if hasattr(record, "message_post"):
+                record.message_post(body=f"Experiment '{record.name}' cancelled.")
         return True
