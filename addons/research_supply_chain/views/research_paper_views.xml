@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <form string="Research Paper">
                 <header>
-                    <button name="action_submit" type="object" string="Submit Paper" class="oe_highlight" invisible="paper_status != 'draft'"/>
+                    <button name="action_submit" type="object" string="Submit Paper" class="oe_highlight" invisible="paper_status != 'draft'"  groups="research_supply_chain.group_researcher,research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                     <field name="paper_status" widget="statusbar" statusbar_visible="draft,submitted,published,archived"/>
                 </header>
                 <sheet>
@@ -103,11 +103,36 @@
         </field>
     </record>
 
+    <!-- Research Paper Search View -->
+    <record id="view_research_paper_search" model="ir.ui.view">
+        <field name="name">research.paper.search</field>
+        <field name="model">research.paper</field>
+        <field name="arch" type="xml">
+            <search string="Search Research Papers">
+                <field name="paper_name"/>
+                <field name="paper_author"/>
+                <field name="paper_doi"/>
+                <field name="project_id"/>
+
+                <filter name="draft" string="Draft" domain="[('paper_status', '=', 'draft')]"/>
+                <filter name="submitted" string="Submitted" domain="[('paper_status', '=', 'submitted')]"/>
+                <filter name="published" string="Published" domain="[('paper_status', '=', 'published')]"/>
+                <filter name="archived" string="Archived" domain="[('paper_status', '=', 'archived')]"/>
+
+                <group>
+                    <filter name="group_status" string="Status" context="{'group_by': 'paper_status'}"/>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Research Paper Action -->
     <record id="action_research_paper" model="ir.actions.act_window">
         <field name="name">Research Papers</field>
         <field name="res_model">research.paper</field>
         <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_research_paper_search"/>
     </record>
 
 </odoo>

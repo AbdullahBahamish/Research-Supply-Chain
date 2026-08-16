@@ -1,10 +1,12 @@
-from odoo import models, fields, api  # type: ignore  # pyfly: ignore [missing-import]
+from odoo import api, fields, models  # type: ignore  # pyfly: ignore [missing-import]
 from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
+
 
 class ResearchRequirement(models.Model):
     _name = "research.requirement"
     _description = "Research Requirement"
     _rec_name = "name"
+    _order = "priority desc, needed_by asc, name"
 
     project_id = fields.Many2one(
         "research.project",
@@ -51,6 +53,7 @@ class ResearchRequirement(models.Model):
         string="Priority",
         default="medium",
         required=True,
+        index=True,
     )
     status = fields.Selection(
         [
@@ -62,6 +65,7 @@ class ResearchRequirement(models.Model):
         string="Status",
         default="requested",
         required=True,
+        index=True,
     )
     requested_date = fields.Date(
         string="Requested Date",
@@ -69,8 +73,12 @@ class ResearchRequirement(models.Model):
     )
     needed_by = fields.Date(
         string="Needed By",
+        index=True,
     )
-
+    active = fields.Boolean(
+        default=True,
+        help="Archived requirements are hidden from default views.",
+    )
     parent_id = fields.Many2one(
         "research.requirement",
         string="Parent Requirement",
@@ -82,46 +90,35 @@ class ResearchRequirement(models.Model):
         string="Child Requirements",
     )
 
-    # ─── Validation Constraints ───────────────────────────────────────────────
-
-    @api.constrains("quantity")
-    def _check_quantity(self):
-        for record in self:
-            if record.quantity <= 0.0:
-                raise ValidationError(
-                    "❌ Invalid Requirement Quantity\n\n"
-                    f"Requirement '{record.name}' has quantity {record.quantity}.\n"
-                    "Quantity must be greater than zero."
-                )
-
-    @api.constrains("requested_date", "needed_by")
-    def _check_dates(self):
-        for record in self:
-            if record.requested_date and record.needed_by and record.needed_by < record.requested_date:
-                raise ValidationError(
-                    "❌ Invalid Requirement Schedule\n\n"
-                    f"Requirement '{record.name}' has 'Needed By' date ({record.needed_by}) "
-                    f"earlier than 'Requested Date' ({record.requested_date}).\n"
-                    "Please adjust the schedule."
-                )
+    _sql_constraints = [
+        (
+            "check_positive_quantity",
+            "CHECK(quantity > 0)",
+            "Quantity must be strictly greater than zero.",
+        ),
+        (
+            "check_dates_chronology",
+            "CHECK(requested_date IS NULL OR needed_by IS NULL OR needed_by >= requested_date)",
+            "The 'Needed By' date must be on or after the 'Requested Date'.",
+        ),
+        (
+            "check_name_min_length",
+            "CHECK(LENGTH(TRIM(name)) >= 3)",
+            "Requirement name must be at least 3 characters long.",
+        ),
+    ]
 
     @api.constrains("parent_id")
-    def _check_recursion(self):
+    def _check_parent_recursion(self):
         for record in self:
-            if not record._check_recursion():
+            has_cycle = (
+                record._has_cycle("parent_id")
+                if hasattr(record, "_has_cycle")
+                else not record._check_recursion("parent_id")
+            )
+            if has_cycle:
                 raise ValidationError(
-                    "❌ Circular Parent Requirement\n\n"
-                    f"Requirement '{record.name}' cannot be its own parent or cause a circular hierarchy loop.\n"
-                    "Please select a valid parent requirement."
-                )
-
-    @api.constrains("name")
-    def _check_name_length(self):
-        for record in self:
-            if len((record.name or "").strip()) < 3:
-                raise ValidationError(
-                    "❌ Requirement Name Too Short\n\n"
-                    "Requirement name must be at least 3 characters long."
+                    f"Requirement '{record.name}' cannot be its own parent or cause a circular hierarchy loop."
                 )
 
     @api.onchange("category")
@@ -134,10 +131,6 @@ class ResearchRequirement(models.Model):
             self.priority = "low"
 
     def calculate_recursive_total_quantity(self) -> float:
-        """
-        Demonstrates RECURSION:
-        Recursively calculates total quantity across nested requirement trees.
-        """
         self.ensure_one()
         total = self.quantity
         if not self.child_ids:
@@ -150,10 +143,6 @@ class ResearchRequirement(models.Model):
 
     @api.model
     def cron_check_overdue_requirements(self):
-        """
-        Cron function: Identifies pending requirements whose 'needed_by' date has passed.
-        - Escalates priority of overdue requested or approved requirements to 'high'.
-        """
         today = fields.Date.context_today(self)
         overdue_reqs = self.search([
             ("status", "in", ["requested", "approved"]),

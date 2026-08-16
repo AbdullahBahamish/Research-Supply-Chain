@@ -48,6 +48,7 @@
                     <group>
                         <group string="Project Information">
                             <field name="lead_researcher_id" options="{'no_create': True}"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="visibility" widget="badge" decoration-info="visibility == 'public'" decoration-warning="visibility == 'private'"/>
                             <field name="active" invisible="1"/>
                         </group>
@@ -109,8 +110,6 @@
                         </page>
                     </notebook>
                 </sheet>
-
-                <!-- Standard Odoo Chatter -->
                 <chatter/>
             </form>
         </field>
@@ -187,10 +186,11 @@
         </field>
     </record>
 
-    <!-- Research Project Pivot View (Restricted to Leads, Managers, Owners, Admins) -->
+    <!-- Research Project Pivot View -->
     <record id="view_research_project_pivot" model="ir.ui.view">
         <field name="name">research.project.pivot</field>
         <field name="model">research.project</field>
+        <field name="group_ids" eval="[(4, ref('research_supply_chain.group_research_lead')), (4, ref('research_supply_chain.group_research_manager')), (4, ref('research_supply_chain.group_research_admin'))]"/>
         <field name="arch" type="xml">
             <pivot string="Projects Analysis">
                 <field name="project_status" type="row"/>
@@ -199,7 +199,7 @@
         </field>
     </record>
 
-    <!-- Research Project Graph View (Restricted to Leads, Managers, Owners, Admins) -->
+    <!-- Research Project Graph View -->
     <record id="view_research_project_graph" model="ir.ui.view">
         <field name="name">research.project.graph</field>
         <field name="model">research.project</field>
@@ -207,6 +207,36 @@
             <graph string="Projects by Status" type="bar">
                 <field name="project_status" type="row"/>
             </graph>
+        </field>
+    </record>
+
+    <!-- Research Project Search View -->
+    <record id="view_research_project_search" model="ir.ui.view">
+        <field name="name">research.project.search</field>
+        <field name="model">research.project</field>
+        <field name="arch" type="xml">
+            <search string="Search Research Projects">
+                <field name="project_name"/>
+                <field name="code"/>
+                <field name="lead_researcher_id"/>
+                <field name="tag_ids"/>
+
+                <filter name="in_progress" string="In Progress" domain="[('project_status', '=', 'in_progress')]"/>
+                <filter name="proposed" string="Proposed" domain="[('project_status', '=', 'proposed')]"/>
+                <filter name="approved" string="Approved" domain="[('project_status', '=', 'approved')]"/>
+                <filter name="completed" string="Completed" domain="[('project_status', '=', 'completed')]"/>
+                <separator/>
+                <filter name="public" string="Public Projects" domain="[('visibility', '=', 'public')]"/>
+                <filter name="private" string="Private Projects" domain="[('visibility', '=', 'private')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+
+                <group>
+                    <filter name="group_status" string="Status" context="{'group_by': 'project_status'}"/>
+                    <filter name="group_lead" string="Lead Researcher" context="{'group_by': 'lead_researcher_id'}"/>
+                    <filter name="group_visibility" string="Visibility" context="{'group_by': 'visibility'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
@@ -223,17 +253,6 @@
                 Track budgets, researchers, experiments, resources, and published research papers in one place.
             </p>
         </field>
-    </record>
-
-
-    <!-- ================================================================ -->
-    <!-- Override home action: admin lands on Research Projects, not Discuss -->
-    <!-- In Odoo 19, set action_id on res.users (home_action was removed    -->
-    <!-- from res.groups). Each user who should land on this app needs their -->
-    <!-- action_id set. Admin user is set here automatically.               -->
-    <!-- ================================================================ -->
-    <record id="base.user_admin" model="res.users">
-        <field name="action_id" ref="action_research_project"/>
     </record>
 
 </odoo>

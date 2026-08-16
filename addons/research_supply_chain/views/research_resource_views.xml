@@ -85,7 +85,7 @@
                                 </span>
                             </div>
                             <div class="oe_kanban_bottom_right">
-                                <field name="availability_status" widget="label_selection" options="{'classes': {'available': 'success', 'in_use': 'warning', 'unavailable': 'danger'}}"/>
+                                <field name="availability_status" widget="badge" decoration-success="availability_status == 'available'" decoration-warning="availability_status == 'in_use'" decoration-danger="availability_status == 'unavailable'"/>
                             </div>
                         </div>
                     </t>
@@ -94,11 +94,42 @@
         </field>
     </record>
 
+    <!-- Research Resource Search View -->
+    <record id="view_research_resource_search" model="ir.ui.view">
+        <field name="name">research.resource.search</field>
+        <field name="model">research.resource</field>
+        <field name="arch" type="xml">
+            <search string="Search Resources">
+                <field name="name"/>
+                <field name="resource_type"/>
+                <field name="owner_project_id"/>
+                <field name="product_id"/>
+
+                <filter name="available" string="Available" domain="[('availability_status', '=', 'available')]"/>
+                <filter name="in_use" string="In Use" domain="[('availability_status', '=', 'in_use')]"/>
+                <filter name="unavailable" string="Unavailable" domain="[('availability_status', '=', 'unavailable')]"/>
+                <separator/>
+                <filter name="equipment" string="Equipment" domain="[('resource_type', '=', 'equipment')]"/>
+                <filter name="dataset" string="Dataset" domain="[('resource_type', '=', 'dataset')]"/>
+                <filter name="software" string="Software" domain="[('resource_type', '=', 'software')]"/>
+                <filter name="service" string="Service" domain="[('resource_type', '=', 'service')]"/>
+                <filter name="other" string="Other" domain="[('resource_type', '=', 'other')]"/>
+
+                <group>
+                    <filter name="group_type" string="Resource Type" context="{'group_by': 'resource_type'}"/>
+                    <filter name="group_availability" string="Availability Status" context="{'group_by': 'availability_status'}"/>
+                    <filter name="group_project" string="Owner Project" context="{'group_by': 'owner_project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Research Resource Action -->
     <record id="action_research_resource" model="ir.actions.act_window">
         <field name="name">Research Resources</field>
         <field name="res_model">research.resource</field>
         <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_research_resource_search"/>
     </record>
 
 </odoo>

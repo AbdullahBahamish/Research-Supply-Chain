@@ -5,6 +5,7 @@ class ProjectBudget(models.Model):
     _name = "project.budget"
     _inherit = ["research.audit.mixin"]
     _description = "Project Budget"
+    _order = "start_date desc, id desc"
     _rec_name = "project_id"
 
     project_id = fields.Many2one(
@@ -52,21 +53,7 @@ class ProjectBudget(models.Model):
         string="End Date",
     )
 
-    @api.constrains("project_id")
-    def _check_project_budget_unique(self):
-        for record in self:
-            if record.project_id:
-                count = self.search_count([
-                    ("project_id", "=", record.project_id.id),
-                    ("id", "!=", record.id),
-                ])
-                if count > 0:
-                    raise ValidationError(
-                        "❌ Duplicate Budget Record\n\n"
-                        f"Project '{record.project_id.project_name}' already has a budget assigned.\n"
-                        "Each project can only have one main budget record."
-                    )
-
+   
     @api.depends("total_amount", "spent_amount")
     def _compute_remaining_amount(self):
         for record in self:
@@ -76,31 +63,67 @@ class ProjectBudget(models.Model):
         for record in self:
             record.total_amount = record.spent_amount + record.remaining_amount
 
-    @api.constrains("total_amount", "spent_amount")
-    def _check_amounts(self):
-        for record in self:
-            if record.total_amount < 0.0:
-                raise ValidationError(
-                    "❌ Negative Budget Amount\n\n"
-                    "Total budget amount cannot be negative.\n"
-                    "Please enter a valid positive total budget."
-                )
-            if record.spent_amount < 0.0:
-                raise ValidationError(
-                    "❌ Negative Spent Amount\n\n"
-                    "Spent budget amount cannot be negative.\n"
-                    "Please enter a valid spent amount."
-                )
+    _sql_constraints = [
+        (
+            "project_budget_unique",
+            "UNIQUE(project_id)",
+            "Each project can only have one main budget record.",
+        ),
+        (
+            "check_amounts_positive",
+            "CHECK(total_amount >= 0.0 AND spent_amount >= 0.0)",
+            "Total and spent budget amounts cannot be negative.",
+        ),
+        (
+            "check_dates_valid",
+            "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
+            "Budget end date must be on or after the start date.",
+        ),
+    ]
 
-    @api.constrains("start_date", "end_date")
-    def _check_dates(self):
-        for record in self:
-            if record.start_date and record.end_date and record.end_date < record.start_date:
-                raise ValidationError(
-                    "❌ Invalid Budget Period\n\n"
-                    f"Budget end date ({record.end_date}) is earlier than start date ({record.start_date}).\n"
-                    "Please correct the budget dates."
-                )
+    # @api.constrains("project_id")
+    # def _check_project_budget_unique(self):
+    #        for record in self:
+    #            if record.project_id:
+    #                count = self.search_count([
+    #                    ("project_id", "=", record.project_id.id),
+    #                    ("id", "!=", record.id),
+    #                ])
+    #                if count > 0:
+    #                    raise ValidationError(
+    #                        "❌ Duplicate Budget Record\n\n"
+    #                        f"Project '{record.project_id.project_name}' already has a budget assigned.\n"
+    #                        "Each project can only have one main budget record."
+    #                    )
+   
+
+    # @api.constrains("total_amount", "spent_amount")
+    # def _check_amounts(self):
+    #     for record in self:
+    #         if record.total_amount < 0.0:
+    #             raise ValidationError(
+    #                 "❌ Negative Budget Amount\n\n"
+    #                 "Total budget amount cannot be negative.\n"
+    #                 "Please enter a valid positive total budget."
+    #             )
+    #         if record.spent_amount < 0.0:
+    #             raise ValidationError(
+    #                 "❌ Negative Spent Amount\n\n"
+    #                 "Spent budget amount cannot be negative.\n"
+    #                 "Please enter a valid spent amount."
+    #             )
+
+
+    # @api.constrains("start_date", "end_date")
+    # def _check_dates(self):
+    #     for record in self:
+    #         if record.start_date and record.end_date and record.end_date < record.start_date:
+    #             raise ValidationError(
+    #                 "❌ Invalid Budget Period\n\n"
+    #                 f"Budget end date ({record.end_date}) is earlier than start date ({record.start_date}).\n"
+    #                 "Please correct the budget dates."
+    #             )
+
 
     @api.onchange("spent_amount", "total_amount")
     def _onchange_amounts(self):

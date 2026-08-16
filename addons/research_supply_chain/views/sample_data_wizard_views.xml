@@ -6,19 +6,12 @@
         <field name="model">research.sample.data.wizard</field>
         <field name="arch" type="xml">
             <form string="Generate Sample Data">
-                <sheet>
-                    <group>
-                        <group string="Configuration">
-                            <field name="num_projects"/>
-                            <field name="num_researchers"/>
-                        </group>
-                    </group>
-                    <p class="text-muted">
-                        Clicking <strong>Generate Fake Data</strong> will populate realistic sample records across Projects, Researchers, Budgets, Requirements, Resources, Experiments, Outputs, and Research Papers.
-                    </p>
-                </sheet>
+                <group>
+                    <field name="num_projects"/>
+                    <field name="num_researchers"/>
+                </group>
                 <footer>
-                    <button string="Generate Fake Data" type="object" name="action_generate_data" class="btn-primary"/>
+                    <button name="action_generate_data" string="Generate Data" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

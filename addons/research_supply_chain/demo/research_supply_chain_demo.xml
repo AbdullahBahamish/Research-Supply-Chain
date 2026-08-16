@@ -238,7 +238,7 @@
         <field name="methodology">Run 5-fold cross-validation across 100 epochs using AdamW optimizer.</field>
         <field name="status">running</field>
         <field name="start_date">2026-02-01</field>
-        <field name="created_by" ref="base.user_admin"/>
+        <field name="create_uid" ref="base.user_admin"/>
     </record>
 
     <record id="demo_experiment_2" model="research.experiment">
@@ -248,7 +248,7 @@
         <field name="methodology">Simulate ansatz circuit execution under realistic depolarizing noise models.</field>
         <field name="status">running</field>
         <field name="start_date">2026-03-01</field>
-        <field name="created_by" ref="demo_user_bob"/>
+        <field name="create_uid" ref="demo_user_bob"/>
     </record>
 
     <record id="demo_experiment_3" model="research.experiment">
@@ -259,7 +259,7 @@
         <field name="status">completed</field>
         <field name="start_date">2025-11-01</field>
         <field name="end_date">2025-12-15</field>
-        <field name="created_by" ref="demo_user_alice"/>
+        <field name="create_uid" ref="demo_user_alice"/>
     </record>
 
     <!-- Experiment Resource Allocation -->

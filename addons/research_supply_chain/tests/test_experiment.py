@@ -21,7 +21,7 @@ class TestExperiment(TransactionCase):
 
     def test_experiment_creation(self):
         self.assertEqual(self.experiment.status, 'planned')
-        self.assertEqual(self.experiment.created_by, self.user)
+        self.assertEqual(self.experiment.create_uid, self.user)
 
     def test_experiment_resource_assignment(self):
         exp_res = self.env['research.experiment.resource'].create({

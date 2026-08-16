@@ -46,9 +46,17 @@
             <list string="Project Budgets" multi_edit="1">
                 <field name="project_id"/>
                 <field name="analytic_account_id"/>
-                <field name="total_amount" widget="monetary"/>
-                <field name="spent_amount" widget="monetary"/>
-                <field name="remaining_amount" widget="monetary"/>
+                <field name="total_amount"
+                    widget="monetary"
+                    groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+
+                <field name="spent_amount"
+                    widget="monetary"
+                    groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
+
+                <field name="remaining_amount"
+                    widget="monetary"
+                    groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
             </list>
@@ -125,11 +133,30 @@
         </field>
     </record>
 
+    <!-- Project Budget Search View -->
+    <record id="view_project_budget_search" model="ir.ui.view">
+        <field name="name">project.budget.search</field>
+        <field name="model">project.budget</field>
+        <field name="arch" type="xml">
+            <search string="Search Project Budgets">
+                <field name="project_id"/>
+                <field name="analytic_account_id"/>
+
+                <filter name="over_budget" string="Over Budget" domain="[('remaining_amount', '&lt;', 0)]"/>
+
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Project Budget Action -->
     <record id="action_project_budget" model="ir.actions.act_window">
         <field name="name">Project Budgets</field>
         <field name="res_model">project.budget</field>
         <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_project_budget_search"/>
     </record>
 
 </odoo>

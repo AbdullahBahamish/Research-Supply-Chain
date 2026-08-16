@@ -144,11 +144,42 @@
         </field>
     </record>
 
+    <!-- Research Requirement Search View -->
+    <record id="view_research_requirement_search" model="ir.ui.view">
+        <field name="name">research.requirement.search</field>
+        <field name="model">research.requirement</field>
+        <field name="arch" type="xml">
+            <search string="Search Requirements">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="category"/>
+                <field name="product_id"/>
+
+                <filter name="requested" string="Requested" domain="[('status', '=', 'requested')]"/>
+                <filter name="approved" string="Approved" domain="[('status', '=', 'approved')]"/>
+                <filter name="fulfilled" string="Fulfilled" domain="[('status', '=', 'fulfilled')]"/>
+                <filter name="cancelled" string="Cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <separator/>
+                <filter name="high_priority" string="High Priority" domain="[('priority', '=', 'high')]"/>
+                <filter name="medium_priority" string="Medium Priority" domain="[('priority', '=', 'medium')]"/>
+                <filter name="low_priority" string="Low Priority" domain="[('priority', '=', 'low')]"/>
+
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_priority" string="Priority" context="{'group_by': 'priority'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Research Requirement Action -->
     <record id="action_research_requirement" model="ir.actions.act_window">
         <field name="name">Research Requirements</field>
         <field name="res_model">research.requirement</field>
         <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_research_requirement_search"/>
     </record>
 
 </odoo>

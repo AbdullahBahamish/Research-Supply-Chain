@@ -22,7 +22,7 @@
 
                     <group>
                         <group string="Account &amp; HR Mapping">
-                            <field name="user_id"/>
+                            <field name="user_id" readonly="id != False" options="{'no_create': True}"/>
                             <field name="employee_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                             <field name="email"/>
                         </group>
@@ -95,11 +95,35 @@
         </field>
     </record>
 
+    <!-- Researcher Search View -->
+    <record id="view_researcher_search" model="ir.ui.view">
+        <field name="name">research.researcher.search</field>
+        <field name="model">research.researcher</field>
+        <field name="arch" type="xml">
+            <search string="Search Researchers">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="position"/>
+                <field name="expertise"/>
+
+                <filter name="is_principal" string="Principal Investigator (PI)" domain="[('is_principal', '=', True)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+
+                <group>
+                    <filter name="group_position" string="Position" context="{'group_by': 'position'}"/>
+                    <filter name="group_is_principal" string="Is Principal Investigator" context="{'group_by': 'is_principal'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Researcher Action -->
     <record id="action_researcher" model="ir.actions.act_window">
         <field name="name">Researchers</field>
         <field name="res_model">research.researcher</field>
         <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_researcher_search"/>
     </record>
 
 </odoo>

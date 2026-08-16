@@ -1,11 +1,13 @@
 import re
-from odoo import models, fields, api  # type: ignore  # pyfly: ignore [missing-import]
+from odoo import api, fields, models  # type: ignore  # pyfly: ignore [missing-import]
 from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
+
 
 class Researcher(models.Model):
     _name = "research.researcher"
     _description = "Researcher"
     _rec_name = "name"
+    _order = "name"
 
     EMAIL_REGEX = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
 
@@ -52,34 +54,23 @@ class Researcher(models.Model):
         string="Project Allocations",
     )
 
-    # ─── Validation Constraints ───────────────────────────────────────────────
-
-    @api.constrains("user_id")
-    def _check_user_id_unique(self):
-        for record in self:
-            if record.user_id and self.search_count([("user_id", "=", record.user_id.id), ("id", "!=", record.id)]) > 0:
-                raise ValidationError(
-                    "❌ Duplicate Researcher Profile\n\n"
-                    f"A researcher profile already exists for user '{record.user_id.name}'.\n"
-                    "Each user account can only be linked to one researcher profile."
-                )
+    _sql_constraints = [
+        (
+            "user_unique",
+            "UNIQUE(user_id)",
+            "A researcher profile already exists for this user account.",
+        ),
+        (
+            "check_position_length",
+            "CHECK(position IS NULL OR LENGTH(TRIM(position)) >= 2)",
+            "Job position must be at least 2 characters long.",
+        ),
+    ]
 
     @api.constrains("email")
     def _check_email_format(self):
         for record in self:
             if record.email and not self.EMAIL_REGEX.match(record.email.strip()):
                 raise ValidationError(
-                    "❌ Invalid Email Address\n\n"
-                    f"The email address '{record.email}' does not appear to be valid.\n"
-                    "Please enter a properly formatted email address (e.g., user@example.com)."
-                )
-
-    @api.constrains("position")
-    def _check_position_length(self):
-        for record in self:
-            if record.position and len(record.position.strip()) < 2:
-                raise ValidationError(
-                    "❌ Invalid Position\n\n"
-                    "Job position must be at least 2 characters long.\n"
-                    "Please provide a valid position title."
+                    f"The email address '{record.email}' does not appear to be valid."
                 )

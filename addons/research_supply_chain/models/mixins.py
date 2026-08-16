@@ -90,12 +90,24 @@ class ResearchAuditMixin(models.AbstractModel):
     )
 
     def _log_system_event(self, event_msg: str):
-        """Weakly private method logging audit entries."""
+        """Weakly private method logging audit entries cleanly and efficiently."""
         for record in self:
             timestamp = fields.Datetime.now()
+            new_entry = f"[{timestamp}] {event_msg}"
+            
+            # 1. Post to chatter if model supports mail.thread
+            if hasattr(record, "message_post"):
+                try:
+                    record.message_post(body=event_msg, message_type="notification")
+                except Exception:
+                    pass
+
+            # 2. Store in audit_notes field (capped at latest 30 entries to prevent performance degradation)
             current_log = record.audit_notes or ""
-            new_entry = f"[{timestamp}] {event_msg}\n"
-            record.audit_notes = new_entry + current_log
+            log_lines = current_log.strip().split("\n") if current_log.strip() else []
+            updated_lines = [new_entry] + log_lines[:29]
+            record.audit_notes = "\n".join(updated_lines) + "\n"
+
 
     def get_security_token(self) -> str:
         """Data hiding method accessing strongly private attribute."""

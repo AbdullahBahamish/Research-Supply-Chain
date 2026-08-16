@@ -1,17 +1,16 @@
 import re
-from odoo import models, fields, api  # type: ignore  # pyfly: ignore [missing-import]
+from odoo import api, fields, models  # type: ignore  # pyfly: ignore [missing-import]
 from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
+
 
 class ResearchPaper(models.Model):
     _name = "research.paper"
     _inherit = ["research.audit.mixin", "mail.thread", "mail.activity.mixin"]
     _description = "Research Paper"
+    _order = "paper_publication_date desc, paper_name"
     _rec_name = "paper_name"
 
-    # Compiled Regex for DOI validation
-    DOI_REGEX = re.compile(r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$", re.IGNORECASE)
-
-    # Compiled Regex with named groups for GitHub URL parsing
+    DOI_REGEX = re.compile(r"^10\.\d{4,9}/[-._;()/:A-Za-z0-9]+$", re.IGNORECASE)
     GITHUB_URL_REGEX = re.compile(r"github\.com/(?P<owner>[\w-]+)/(?P<repo>[\w-]+)")
 
     paper_name = fields.Char(
@@ -66,6 +65,32 @@ class ResearchPaper(models.Model):
         store=True,
     )
 
+    _sql_constraints = [
+        (
+            "check_published_doi_required",
+            "CHECK (paper_status != 'published' OR (paper_doi IS NOT NULL AND trim(paper_doi) != ''))",
+            "A valid DOI is required when the paper status is set to 'Published'.",
+        ),
+        (
+            "check_published_date_required",
+            "CHECK(paper_status != 'published' OR paper_publication_date IS NOT NULL)",
+            "A publication date is required when the paper status is set to 'Published'.",
+        ),
+        (
+            "check_paper_name_length",
+            "CHECK(paper_name IS NULL OR length(trim(paper_name)) >= 5)",
+            "Paper title must be at least 5 characters long.",
+        ),
+    ]
+
+    @api.constrains("paper_doi")
+    def _check_doi_format(self):
+        for record in self:
+            if record.paper_doi and not self.DOI_REGEX.match(record.paper_doi.strip()):
+                raise ValidationError(
+                    f"DOI '{record.paper_doi}' does not match standard notation (e.g. 10.1000/182)."
+                )
+
     @api.depends("paper_github_url")
     def _compute_repository_name(self):
         for record in self:
@@ -87,51 +112,7 @@ class ResearchPaper(models.Model):
         if self.project_id and self.project_id.lead_researcher_id and not self.paper_author:
             self.paper_author = self.project_id.lead_researcher_id.name
 
-    # ─── Validation Constraints ───────────────────────────────────────────────
-
-    @api.constrains("paper_doi")
-    def _check_doi_format(self):
-        """Demonstrates REGULAR EXPRESSIONS (re.match)."""
-        for record in self:
-            if record.paper_doi and not self.DOI_REGEX.match(record.paper_doi.strip()):
-                raise ValidationError(
-                    "❌ Invalid DOI Format\n\n"
-                    f"DOI '{record.paper_doi}' does not match standard DOI format.\n"
-                    "Example of valid DOI: 10.1000/182"
-                )
-
-    @api.constrains("paper_status", "paper_doi")
-    def _check_published_doi_required(self):
-        for record in self:
-            if record.paper_status == "published" and not (record.paper_doi or "").strip():
-                raise ValidationError(
-                    "❌ DOI Required for Published Paper\n\n"
-                    f"Paper '{record.paper_name}' is set to 'Published' but has no DOI specified.\n"
-                    "Please enter a valid DOI before publishing."
-                )
-
-    @api.constrains("paper_status", "paper_publication_date")
-    def _check_published_date_required(self):
-        for record in self:
-            if record.paper_status == "published" and not record.paper_publication_date:
-                raise ValidationError(
-                    "❌ Publication Date Required\n\n"
-                    f"Paper '{record.paper_name}' is marked as 'Published' but has no publication date.\n"
-                    "Please enter the publication date."
-                )
-
-    @api.constrains("paper_name")
-    def _check_paper_name_length(self):
-        for record in self:
-            if len((record.paper_name or "").strip()) < 5:
-                raise ValidationError(
-                    "❌ Paper Title Too Short\n\n"
-                    "Paper title must be at least 5 characters long.\n"
-                    "Please provide a complete title."
-                )
-
     def action_parse_github_repository(self) -> dict:
-        """Demonstrates REGULAR EXPRESSIONS with named groups (re.search)."""
         self.ensure_one()
         if not self.paper_github_url:
             return {"owner": False, "repo": False}
@@ -146,17 +127,16 @@ class ResearchPaper(models.Model):
 
     def action_submit(self):
         for record in self:
+            record.check_access_rights("write")
+            record.check_access_rule("write")
             if record.paper_status != "draft":
                 continue
             record.paper_status = "submitted"
             record._log_system_event(f"Paper '{record.paper_name}' submitted for publication review.")
+        return True
 
     @api.model
     def cron_check_paper_statuses(self):
-        """
-        Cron function: Monitors pending research paper reviews and draft statuses.
-        - Logs reminders for submitted papers pending publication review.
-        """
         submitted_papers = self.search([("paper_status", "=", "submitted")])
         for paper in submitted_papers:
             paper._log_system_event(

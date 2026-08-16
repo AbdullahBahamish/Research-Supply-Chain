@@ -30,6 +30,14 @@
         action="action_researcher"
         sequence="20"
     />
+    <menuitem
+        id="menu_project_tag"
+        name="Project Tags"
+        parent="menu_projects_team"
+        action="action_research_project_tag"
+        sequence="30"
+        groups="research_supply_chain.group_research_lead,research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"
+    />
 
     <!-- Requirements & Resources Category -->
     <menuitem

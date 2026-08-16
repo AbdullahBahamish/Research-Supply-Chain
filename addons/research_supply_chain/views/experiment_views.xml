@@ -23,7 +23,7 @@
                     <group>
                         <group string="General Information">
                             <field name="project_id" options="{'no_create': True}"/>
-                            <field name="created_by" options="{'no_create': True}"/>
+                            <field name="create_uid" string="Created By" readonly="1"/>
                         </group>
                         <group string="Schedule">
                             <field name="start_date"/>
@@ -75,7 +75,7 @@
                 <field name="project_id"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="created_by"/>
+                <field name="create_uid" string="Created By"/>
                 <field name="status" widget="badge" decoration-info="status == 'planned'" decoration-warning="status == 'running'" decoration-success="status == 'completed'" decoration-danger="status == 'cancelled'"/>
             </list>
         </field>
@@ -92,7 +92,7 @@
                 <field name="status"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="created_by"/>
+                <field name="create_uid"/>
                 <field name="resource_count"/>
                 <field name="output_count"/>
                 <templates>
@@ -118,7 +118,7 @@
                                 </span>
                             </div>
                             <div class="oe_kanban_bottom_right">
-                                <field name="created_by" widget="many2one_avatar_user"/>
+                                <field name="create_uid" widget="many2one_avatar_user"/>
                             </div>
                         </div>
                     </t>
@@ -150,11 +150,39 @@
         </field>
     </record>
 
+    <!-- Experiment Search View -->
+    <record id="view_experiment_search" model="ir.ui.view">
+        <field name="name">research.experiment.search</field>
+        <field name="model">research.experiment</field>
+        <field name="arch" type="xml">
+            <search string="Search Experiments">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="objective"/>
+                <field name="create_uid"/>
+
+                <filter name="planned" string="Planned" domain="[('status', '=', 'planned')]"/>
+                <filter name="running" string="Running" domain="[('status', '=', 'running')]"/>
+                <filter name="completed" string="Completed" domain="[('status', '=', 'completed')]"/>
+                <filter name="cancelled" string="Cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <separator/>
+                <filter name="my_experiments" string="My Experiments" domain="[('create_uid', '=', uid)]"/>
+
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_creator" string="Created By" context="{'group_by': 'create_uid'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Experiment Action -->
     <record id="action_experiment" model="ir.actions.act_window">
         <field name="name">Experiments</field>
         <field name="res_model">research.experiment</field>
         <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_experiment_search"/>
     </record>
 
 </odoo>

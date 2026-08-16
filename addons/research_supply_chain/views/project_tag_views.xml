@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Research Project Tag Form View -->
+    <record id="view_research_project_tag_form" model="ir.ui.view">
+        <field name="name">research.project.tag.form</field>
+        <field name="model">research.project.tag</field>
+        <field name="arch" type="xml">
+            <form string="Project Tag">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="color" widget="color_picker"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Research Project Tag List View -->
+    <record id="view_research_project_tag_list" model="ir.ui.view">
+        <field name="name">research.project.tag.list</field>
+        <field name="model">research.project.tag</field>
+        <field name="arch" type="xml">
+            <list string="Project Tags" editable="bottom">
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Research Project Tag Search View -->
+    <record id="view_research_project_tag_search" model="ir.ui.view">
+        <field name="name">research.project.tag.search</field>
+        <field name="model">research.project.tag</field>
+        <field name="arch" type="xml">
+            <search string="Search Project Tags">
+                <field name="name"/>
+                <group>
+                    <filter name="group_color" string="Color" context="{'group_by': 'color'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Research Project Tag Action -->
+    <record id="action_research_project_tag" model="ir.actions.act_window">
+        <field name="name">Project Tags</field>
+        <field name="res_model">research.project.tag</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_research_project_tag_search"/>
+    </record>
+
+</odoo>

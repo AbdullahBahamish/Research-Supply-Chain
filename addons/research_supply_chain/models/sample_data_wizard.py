@@ -109,7 +109,6 @@ class ResearchSampleDataWizard(models.TransientModel):
                 "methodology": "Run 5-fold cross validation trial.",
                 "status": "running",
                 "start_date": today,
-                "created_by": self.env.uid,
             })
 
             # Link resource to experiment

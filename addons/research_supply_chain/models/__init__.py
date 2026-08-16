@@ -1,6 +1,7 @@
 from . import mixins
 from . import researcher
 from . import research_project_researcher
+from . import project_tag
 from . import research_project
 from . import project_budget
 from . import research_requirement
