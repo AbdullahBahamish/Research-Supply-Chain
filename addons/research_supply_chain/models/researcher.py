@@ -66,12 +66,12 @@ class Researcher(models.Model):
     )
 
     _sql_constraints = [
-        (
+        models.Constraint(
             "user_unique",
             "UNIQUE(user_id)",
             "A researcher profile already exists for this user account.",
         ),
-        (
+        models.Constraint(
             "check_position_length",
             "CHECK(position IS NULL OR LENGTH(TRIM(position)) >= 2)",
             "Job position must be at least 2 characters long.",

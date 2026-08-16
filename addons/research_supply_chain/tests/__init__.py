@@ -5,3 +5,7 @@ from . import test_researcher
 from . import test_cron_jobs
 from . import test_dynamic_changes
 from . import test_inverse_functions
+from . import test_api_controllers
+from . import test_security_rules
+from . import test_mixins
+from . import test_sample_data_wizard

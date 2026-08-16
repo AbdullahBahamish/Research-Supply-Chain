@@ -160,27 +160,27 @@ class ResearchProject(models.Model):
     )
 
     _sql_constraints = [
-        (
+        models.Constraint(
             "code_unique",
             "UNIQUE(code)",
             "Project code must be unique across all projects.",
         ),
-        (
+        models.Constraint(
             "check_dates_valid",
             "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
             "Project end date must be on or after the start date.",
         ),
-        (
+        models.Constraint(
             "check_project_name_length",
             "CHECK(LENGTH(TRIM(project_name)) >= 5)",
             "Project title must be at least 5 characters long.",
         ),
-        (
+        models.Constraint(
             "check_status_requires_start_date",
             "CHECK(project_status NOT IN ('in_progress', 'completed') OR start_date IS NOT NULL)",
             "Project status requires a start date.",
         ),
-        (
+        models.Constraint(
             "check_completed_requires_end_date",
             "CHECK(project_status != 'completed' OR end_date IS NOT NULL)",
             "Completed projects must have an end date.",

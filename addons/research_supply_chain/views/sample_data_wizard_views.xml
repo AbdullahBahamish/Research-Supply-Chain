@@ -23,7 +23,17 @@
         <field name="res_model">research.sample.data.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="groups_id" eval="[(4, ref('research_supply_chain.group_research_admin'))]"/>
+        <!-- <field name="groups_id" eval="[(4, ref('research_supply_chain.group_research_admin'))]"/> -->
     </record>
+
+    <!-- Menu -->
+    <menuitem
+        id="menu_generate_sample_data"
+        name="Generate Sample Data"
+        parent="menu_tools"
+        action="action_research_sample_data_wizard"
+        sequence="10"
+        groups="research_supply_chain.group_research_admin"
+    />
 
 </odoo>

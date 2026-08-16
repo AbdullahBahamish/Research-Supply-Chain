@@ -102,17 +102,17 @@ class ResearchRequirement(models.Model):
     )
 
     _sql_constraints = [
-        (
+        models.Constraint(
             "check_positive_quantity",
             "CHECK(quantity > 0)",
             "Quantity must be strictly greater than zero.",
         ),
-        (
+        models.Constraint(
             "check_dates_chronology",
             "CHECK(requested_date IS NULL OR needed_by IS NULL OR needed_by >= requested_date)",
             "The 'Needed By' date must be on or after the 'Requested Date'.",
         ),
-        (
+        models.Constraint(
             "check_name_min_length",
             "CHECK(LENGTH(TRIM(name)) >= 3)",
             "Requirement name must be at least 3 characters long.",

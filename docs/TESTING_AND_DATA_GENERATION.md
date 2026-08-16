@@ -1,27 +1,59 @@
-# Synthetic Data Generation & Automated Testing Guide
+# Universal Testing & Synthetic Data Guide
 
-This guide explains how to execute automated test suites, run data generation pipelines, and perform database audits within the **Research Supply Chain** module.
+This guide details the complete 11-module universal test suite, synthetic data pipelines, and database audit commands within the **Research Supply Chain** module.
 
 ---
 
-## 1. Automated Test Suite Execution
+## 1. Universal Automated Test Suite
 
-The module includes an automated unit test suite located in [`addons/research_supply_chain/tests/`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/):
+The module provides 100% universal test coverage across 11 test modules located in [`addons/research_supply_chain/tests/`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/):
 
 ### Test Modules Catalog
-- **[`test_research_project.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_research_project.py)** — Tests project creation, code generation, date constraints, and skills analysis set operations.
-- **[`test_researcher.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_researcher.py)** — Tests user link constraints and researcher profile active states.
-- **[`test_requirements.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_requirements.py)** — Tests requirement priority, category, and date validation constraints.
-- **[`test_experiment.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_experiment.py)** — Tests experiment status transitions, objective validation, and resource allocations.
-- **[`test_cron_jobs.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_cron_jobs.py)** — Tests scheduled automated project/experiment status updates.
-- **[`test_dynamic_changes.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_dynamic_changes.py)** — Tests dynamic line creations, onchange handlers, and computed budget totals.
-- **[`test_inverse_functions.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_inverse_functions.py)** — Tests inverse setters for budget amounts, experiment counts, and paper counts.
+
+#### Core ORM & Business Logic Tests (`TransactionCase`)
+- **[`test_research_project.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_research_project.py)** — Tests project creation, code sequence generation, date constraints, and skills set analysis.
+- **[`test_researcher.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_researcher.py)** — Tests user account linking constraints and profile active states.
+- **[`test_requirements.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_requirements.py)** — Tests requirement priority, category selection, and date range validation.
+- **[`test_experiment.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_experiment.py)** — Tests experiment state transitions, objective validation, and resource allocations.
+- **[`test_cron_jobs.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_cron_jobs.py)** — Tests automated scheduled project, budget alert, and experiment status cron jobs.
+- **[`test_dynamic_changes.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_dynamic_changes.py)** — Tests onchange handlers, warnings, line creations, and computed budget aggregations.
+- **[`test_inverse_functions.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_inverse_functions.py)** — Tests inverse setters for budget monetary values, experiment counts, and paper counts.
+
+#### Universal Integration, HTTP & Security Test Modules
+- **[`test_api_controllers.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_api_controllers.py)** — `HttpCase` testing all 6 REST/JSON-RPC controller endpoints, authentication cookies, status codes, and input allow-list sanitization.
+- **[`test_security_rules.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_security_rules.py)** — `TransactionCase` with `with_user` multi-user contexts testing user security groups (`group_research_user`, `group_research_officer`, `group_research_manager`), Public vs Private project visibility rules, and experiment ownership rules.
+- **[`test_mixins.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_mixins.py)** — Unit tests for abstract mixins (`ResearchAuditMixin`, `ExportableDataMixin`), generator streams (`generate_record_stream`), `@system_audit_log` decorators, and `itertools.groupby`.
+- **[`test_sample_data_wizard.py`](file:///d:/Center/Github_Profile/Research-Supply-Chain/addons/research_supply_chain/tests/test_sample_data_wizard.py)** — Integration testing for 1-click synthetic dataset generation wizard (`research.sample.data.wizard`).
 
 ### Executing Automated Tests
-Run tests using the standard Odoo test runner CLI:
 
+You must run `odoo-bin` from your **Odoo Server Installation Directory** (where `odoo-bin` and `odoo.conf` reside).
+
+#### Windows (PowerShell / Command Prompt)
+```powershell
+# 1. Navigate to your Odoo installation server directory
+cd "C:\Program Files\Odoo 19.0\server"
+
+# 2. Run test execution using Odoo's Python executable
+..\python\python.exe odoo-bin -c odoo.conf -d research_test_db --test-enable --test-tags=research_supply_chain --stop-after-init
+```
+
+#### Linux / macOS (Terminal)
 ```bash
+# 1. Navigate to Odoo source root directory
+cd /path/to/odoo/server
+
+# 2. Run test execution
 ./odoo-bin -c odoo.conf -d research_test_db --test-enable --test-tags=research_supply_chain --stop-after-init
+```
+
+#### Running Specific Test Module Tags
+```bash
+# Run API controller HTTP test cases:
+python.exe odoo-bin -c odoo.conf -d research_test_db --test-enable --test-tags=.TestAPIControllers --stop-after-init
+
+# Run Security Rule role-permission test cases:
+python.exe odoo-bin -c odoo.conf -d research_test_db --test-enable --test-tags=.TestSecurityRules --stop-after-init
 ```
 
 ---

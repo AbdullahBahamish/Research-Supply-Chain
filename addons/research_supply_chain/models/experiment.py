@@ -85,27 +85,27 @@ class Experiment(models.Model):
     )
 
     _sql_constraints = [
-        (
+        models.Constraint(
             "unique_name_per_project",
             "UNIQUE(project_id, name)",
             "An experiment with this title already exists in the selected project.",
         ),
-        (
+        models.Constraint(
             "check_date_range",
             "CHECK(start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
             "The experiment's end date must be on or after its start date.",
         ),
-        (
+        models.Constraint(
             "check_running_start_date",
             "CHECK(status != 'running' OR start_date IS NOT NULL)",
             "Running experiments must have a start date.",
         ),
-        (
+        models.Constraint(
             "check_completed_end_date",
             "CHECK(status != 'completed' OR end_date IS NOT NULL)",
             "Completed experiments must have an end date.",
         ),
-        (
+        models.Constraint(
             "check_objective_required_for_active_status",
             "CHECK(status NOT IN ('running', 'completed') OR (objective IS NOT NULL AND trim(objective) != ''))",
             "An objective is required before an experiment can be marked as 'Running' or 'Completed'.",

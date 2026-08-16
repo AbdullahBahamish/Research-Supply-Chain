@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <form string="Researcher Profile">
                 <sheet>
-                    <widget name="web_ribbon" title="Principal Investigator" bg_color="bg-warning" invisible="not is_principal"/>
+                    <widget name="web_ribbon" title="Principal Investigator" bg_color="bg-warning" invisible="not is_principal" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-secondary" invisible="active"/>
 
                     <div class="oe_title">

@@ -15,5 +15,5 @@ class ResearchProjectTag(models.Model):
     )
 
     _sql_constraints = [
-        ("name_uniq", "UNIQUE(name)", "Tag name must be unique!"),
+        models.Constraint("name_uniq", "UNIQUE(name)", "Tag name must be unique!"),
     ]

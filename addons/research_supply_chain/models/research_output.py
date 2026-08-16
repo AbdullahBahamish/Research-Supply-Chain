@@ -65,15 +65,15 @@ class ResearchOutput(models.Model):
 
     # ─── Validation Constraints ───────────────────────────────────────────────
     _sql_constraints = [
-        (
+        models.Constraint(
             "check_name_length",
             "CHECK(LENGTH(TRIM(name)) >= 3)",
-            "❌ Output Title Too Short\n\n",
+            "Output title must be at least 3 characters long.",
         ),
-        (
+        models.Constraint(
             "unique_output_per_experiment",
             "UNIQUE(name, experiment_id)",
-            "❌ An output with this title already exists in the selected experiment.",
+            "An output with this title already exists in the selected experiment.",
         ),
     ]
 

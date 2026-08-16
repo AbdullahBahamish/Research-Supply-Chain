@@ -41,7 +41,7 @@ def _sanitize_vals(vals: dict, allowed_fields: set) -> dict:
 
 class ResearchSupplyChainAPIController(http.Controller):
 
-    @http.route('/api/v1/projects', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/v1/projects', type='jsonrpc', auth='user', methods=['POST'], csrf=False)
     def api_get_projects(self, **kw):
         """
         Fetch list of research projects with pagination and error handling.
@@ -81,7 +81,7 @@ class ResearchSupplyChainAPIController(http.Controller):
             _logger.exception("API Error in api_get_projects")
             return {'status': 500, 'error': 'Internal server error'}
 
-    @http.route('/api/v1/project/create', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/v1/project/create', type='jsonrpc', auth='user', methods=['POST'], csrf=False)
     def api_create_project(self, **kw):
         """Create a new research project record safely."""
         try:
@@ -108,7 +108,7 @@ class ResearchSupplyChainAPIController(http.Controller):
             _logger.exception("API Error in api_create_project")
             return {'status': 500, 'error': 'Internal server error'}
 
-    @http.route('/api/v1/researchers', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/v1/researchers', type='jsonrpc', auth='user', methods=['POST'], csrf=False)
     def api_get_researchers(self, **kw):
         """Fetch list of active researchers with pagination.
 
@@ -137,7 +137,7 @@ class ResearchSupplyChainAPIController(http.Controller):
             _logger.exception("API Error in api_get_researchers")
             return {'status': 500, 'error': 'Internal server error'}
 
-    @http.route('/api/v1/experiments', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/v1/experiments', type='jsonrpc', auth='user', methods=['POST'], csrf=False)
     def api_get_experiments(self, **kw):
         """
         Fetch list of research experiments grouped by status.
@@ -163,7 +163,7 @@ class ResearchSupplyChainAPIController(http.Controller):
             _logger.exception("API Error in api_get_experiments")
             return {'status': 500, 'error': 'Internal server error'}
 
-    @http.route('/api/v1/papers', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/v1/papers', type='jsonrpc', auth='user', methods=['POST'], csrf=False)
     def api_get_papers(self, **kw):
         """Fetch list of research papers & publications."""
         try:
@@ -180,7 +180,7 @@ class ResearchSupplyChainAPIController(http.Controller):
             _logger.exception("API Error in api_get_papers")
             return {'status': 500, 'error': 'Internal server error'}
 
-    @http.route('/api/v1/papers/public', type='json', auth='public', methods=['POST', 'GET'], csrf=False)
+    @http.route('/api/v1/papers/public', type='jsonrpc', auth='public', methods=['POST', 'GET'], csrf=False)
     def api_public_papers(self, **kw):
         """Public endpoint for external citation of published research papers."""
         try:

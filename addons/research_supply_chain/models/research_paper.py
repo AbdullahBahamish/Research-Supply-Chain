@@ -78,17 +78,17 @@ class ResearchPaper(models.Model):
     )
 
     _sql_constraints = [
-        (
+        models.Constraint(
             "check_published_doi_required",
             "CHECK (paper_status != 'published' OR (paper_doi IS NOT NULL AND trim(paper_doi) != ''))",
             "A valid DOI is required when the paper status is set to 'Published'.",
         ),
-        (
+        models.Constraint(
             "check_published_date_required",
             "CHECK(paper_status != 'published' OR paper_publication_date IS NOT NULL)",
             "A publication date is required when the paper status is set to 'Published'.",
         ),
-        (
+        models.Constraint(
             "check_paper_name_length",
             "CHECK(paper_name IS NULL OR length(trim(paper_name)) >= 5)",
             "Paper title must be at least 5 characters long.",

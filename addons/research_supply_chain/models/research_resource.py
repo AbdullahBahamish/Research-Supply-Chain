@@ -61,12 +61,12 @@ class ResearchResource(models.Model):
 
     # ─── Validation Constraints ───────────────────────────────────────────────
     _sql_constraints = [
-        (
+        models.Constraint(
             "check_name_min_length",
             "CHECK(LENGTH(TRIM(name)) >= 3)",
             "Resource name must be at least 3 characters long.",
         ),
-        (
+        models.Constraint(
             "unique_resource_per_project",
             "UNIQUE(name, owner_project_id)",
             "A resource with this name already exists in the selected project.",
