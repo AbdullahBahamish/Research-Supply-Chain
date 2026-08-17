@@ -194,3 +194,16 @@ class ResearchSupplyChainAPIController(http.Controller):
         except Exception as e:
             _logger.exception("API Error in api_public_papers")
             return {'status': 500, 'error': 'Internal server error'}
+
+    @http.route('/api/v1/ontology/export', type='jsonrpc', auth='user', methods=['POST'], csrf=False)
+    def api_export_owl_ontology(self, **kw):
+        """Authenticated endpoint for exporting semantic Web Ontology Language (OWL/RDF) graph."""
+        try:
+            project_ids = kw.get('project_ids')
+            owl_content = request.env['research.owl.exporter'].export_projects_to_owl_xml(project_ids=project_ids)
+            return {'status': 200, 'content_type': 'application/rdf+xml', 'owl_xml': owl_content}
+        except AccessError as e:
+            return {'status': 403, 'error': str(e)}
+        except Exception as e:
+            _logger.exception("API Error in api_export_owl_ontology")
+            return {'status': 500, 'error': 'Internal server error'}

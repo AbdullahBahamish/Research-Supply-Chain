@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="research_supply_chain.ResearchDashboard" owl="1">
+        <div class="o_research_dashboard p-4 overflow-auto h-100 bg-light">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">
+                        <i class="fa fa-flask me-2"/>Research Supply Chain Overview
+                    </h2>
+                    <p class="text-muted mb-0">Live project analytics, experiment tracking, and resource management.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary shadow-sm" t-on-click="createNewProject">
+                        <i class="fa fa-plus me-1"/> New Research Project
+                    </button>
+                    <button class="btn btn-outline-secondary shadow-sm" t-on-click="loadDashboardData">
+                        <i class="fa fa-refresh me-1"/> Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <t t-if="state.loading">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading dashboard...</span>
+                    </div>
+                    <p class="text-muted mt-2">Fetching live metrics...</p>
+                </div>
+            </t>
+            <t t-else="">
+                <!-- KPI Metric Cards Grid -->
+                <div class="row g-3 mb-4">
+                    <!-- Active Projects KPI -->
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 border-start border-primary border-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-uppercase text-muted fw-semibold small">Active Projects</span>
+                                        <h3 class="fw-bold mb-0 text-dark" t-esc="state.stats.totalProjects"/>
+                                    </div>
+                                    <div class="bg-primary-subtle text-primary p-3 rounded-circle">
+                                        <i class="fa fa-folder-open fa-2x"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ongoing Experiments KPI -->
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 border-start border-info border-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-uppercase text-muted fw-semibold small">Active Experiments</span>
+                                        <h3 class="fw-bold mb-0 text-info" t-esc="state.stats.activeExperiments"/>
+                                    </div>
+                                    <div class="bg-info-subtle text-info p-3 rounded-circle">
+                                        <i class="fa fa-flask fa-2x"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Published Outputs KPI -->
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm rounded-3 h-100 border-start border-success border-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-uppercase text-muted fw-semibold small">Published Outputs</span>
+                                        <h3 class="fw-bold mb-0 text-success" t-esc="state.stats.publishedOutputs"/>
+                                    </div>
+                                    <div class="bg-success-subtle text-success p-3 rounded-circle">
+                                        <i class="fa fa-graduation-cap fa-2x"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Budget KPI (Gated to Finance / Manager) -->
+                    <t t-if="state.isFinanceOfficer || state.isManager">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-3 h-100 border-start border-warning border-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="text-uppercase text-muted fw-semibold small">Total Allocated Budget</span>
+                                            <h3 class="fw-bold mb-0 text-warning" t-esc="state.stats.totalBudgetAllocated.toLocaleString()"/>
+                                            <small class="text-muted">Spent: <t t-esc="state.stats.totalBudgetSpent.toLocaleString()"/></small>
+                                        </div>
+                                        <div class="bg-warning-subtle text-warning p-3 rounded-circle">
+                                            <i class="fa fa-money fa-2x"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Recent Projects List -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark"><i class="fa fa-list me-2"/>Recent Research Projects</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Project Title</th>
+                                        <th>Lead Researcher</th>
+                                        <th>Status</th>
+                                        <th>Start Date</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.recentProjects" t-as="project" t-key="project.id">
+                                        <tr>
+                                            <td class="fw-semibold" t-esc="project.code"/>
+                                            <td t-esc="project.project_name"/>
+                                            <td>
+                                                <t t-if="project.lead_researcher_id">
+                                                    <span t-esc="project.lead_researcher_id[1]"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="text-muted fst-italic">Unassigned</span>
+                                                </t>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary text-capitalize" t-esc="project.project_status"/>
+                                            </td>
+                                            <td t-esc="project.start_date or '-'"/>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.openProject(project.id)">
+                                                    View Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.recentProjects.length === 0">
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4 text-muted">No projects found.</td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

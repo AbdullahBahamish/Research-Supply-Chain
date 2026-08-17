@@ -9,3 +9,4 @@ from . import test_api_controllers
 from . import test_security_rules
 from . import test_mixins
 from . import test_sample_data_wizard
+from . import test_owl_integration

@@ -7,6 +7,7 @@
     "website": "https://github.com/AbdullahBahamish/Research-Supply-Chain",
     "depends": [
         "base",
+        "web",
         "mail",
         "hr",
         "product",
@@ -32,6 +33,15 @@
     "demo": [
         "demo/research_supply_chain_demo.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "research_supply_chain/static/src/components/research_dashboard/research_dashboard.js",
+            "research_supply_chain/static/src/components/research_dashboard/research_dashboard.xml",
+            "research_supply_chain/static/src/components/research_dashboard/research_dashboard.scss",
+            "research_supply_chain/static/src/components/budget_gauge/budget_gauge_widget.js",
+            "research_supply_chain/static/src/components/budget_gauge/budget_gauge_widget.xml",
+        ],
+    },
     "post_init_hook": "post_init_hook",
     "installable": True,
     "application": True,

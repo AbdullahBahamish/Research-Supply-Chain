@@ -46,6 +46,11 @@ class ProjectBudget(models.Model):
         inverse="_inverse_remaining_amount",
         store=True,
     )
+    utilization_rate = fields.Float(
+        string="Budget Utilization (%)",
+        compute="_compute_utilization_rate",
+        help="Percentage of total allocated budget spent.",
+    )
     start_date = fields.Date(
         string="Start Date",
     )
@@ -53,7 +58,14 @@ class ProjectBudget(models.Model):
         string="End Date",
     )
 
-   
+    @api.depends("total_amount", "spent_amount")
+    def _compute_utilization_rate(self):
+        for record in self:
+            if record.total_amount > 0.0:
+                record.utilization_rate = (record.spent_amount / record.total_amount) * 100.0
+            else:
+                record.utilization_rate = 0.0
+
     @api.depends("total_amount", "spent_amount")
     def _compute_remaining_amount(self):
         for record in self:

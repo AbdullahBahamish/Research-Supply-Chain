@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="research_supply_chain.BudgetGaugeWidget" owl="1">
+        <div class="o_budget_gauge_widget my-1">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-semibold text-dark small" t-esc="statusLabel"/>
+                <span class="fw-bold small" t-esc="percentage + '%'"/>
+            </div>
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                     t-att-class="progressColorClass"
+                     role="progressbar"
+                     t-att-style="'width: ' + percentage + '%'"
+                     t-att-aria-valuenow="percentage"
+                     aria-valuemin="0"
+                     aria-valuemax="100"/>
+            </div>
+        </div>
+    </t>
+</templates>

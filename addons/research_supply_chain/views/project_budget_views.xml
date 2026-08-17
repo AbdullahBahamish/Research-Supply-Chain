@@ -19,6 +19,7 @@
                             <field name="total_amount" widget="monetary"/>
                             <field name="spent_amount" widget="monetary" readonly="1"/>
                             <field name="remaining_amount" widget="monetary" readonly="1"/>
+                            <field name="utilization_rate" widget="research_budget_gauge" readonly="1"/>
                         </group>
                         <group string="Accounting &amp; Schedule">
                             <field name="analytic_account_id" groups="research_supply_chain.group_research_manager,research_supply_chain.group_research_admin"/>
@@ -98,6 +99,9 @@
                                 <small class="text-muted d-block">Remaining</small>
                                 <strong class="text-success"><field name="remaining_amount" widget="monetary"/></strong>
                             </div>
+                        </div>
+                        <div class="my-2">
+                            <field name="utilization_rate" widget="research_budget_gauge"/>
                         </div>
                         <div class="o_kanban_record_bottom mt-2 pt-2 border-top text-muted small" t-if="record.start_date.raw_value">
                             <i class="fa fa-calendar me-1" title="Period"/> <field name="start_date"/> - <field name="end_date"/>

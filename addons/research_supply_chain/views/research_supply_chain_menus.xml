@@ -9,6 +9,22 @@
         sequence="10"
     />
 
+    <!-- Client Action: OWL Research Dashboard -->
+    <record id="action_research_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">research_dashboard_client_action</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_research_dashboard"
+        name="Dashboard"
+        parent="menu_research_supply_chain_root"
+        action="action_research_dashboard"
+        sequence="5"
+        groups="research_supply_chain.group_research_user"
+    />
+
     <!-- Projects & Team Category -->
     <menuitem
         id="menu_projects_team"
