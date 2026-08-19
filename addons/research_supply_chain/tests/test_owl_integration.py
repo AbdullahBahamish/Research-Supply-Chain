@@ -6,14 +6,20 @@ class TestOWLIntegration(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.researcher = cls.env['research.researcher'].create({
+        cls.user = cls.env['res.users'].create({
             'name': 'Dr. Alan Turing',
+            'login': 'alan_turing_owl',
             'email': 'alan.turing@research.org',
+        })
+        cls.researcher = cls.env['research.researcher'].create({
+            'user_id': cls.user.id,
+            'position': 'Research Fellow',
         })
         cls.project = cls.env['research.project'].create({
             'project_name': 'Quantum Computing Initiative',
             'lead_researcher_id': cls.researcher.id,
             'project_status': 'in_progress',
+            'start_date': '2026-01-01',
         })
         cls.budget = cls.env['project.budget'].create({
             'project_id': cls.project.id,

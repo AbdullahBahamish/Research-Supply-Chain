@@ -31,6 +31,7 @@ class ResearchPaper(models.Model):
     )
     paper_doi = fields.Char(
         string="Paper DOI",
+        trim=True,
         tracking=True,
     )
     paper_status = fields.Selection(
@@ -102,10 +103,15 @@ class ResearchPaper(models.Model):
     def _compute_repository_name(self):
         for record in self:
             parsed = record.action_parse_github_repository()
-            if parsed and parsed.get("owner") and parsed.get("repo"):
-                record.repository_name = f"{parsed['owner']}/{parsed['repo']}"
-            else:
-                record.repository_name = False
+            record.repository_name = (
+                f"{parsed['owner']}/{parsed['repo']}"
+                if parsed["owner"] and parsed["repo"]
+                else False
+            )
+            # if parsed and parsed.get("owner") and parsed.get("repo"):
+            #     record.repository_name = f"{parsed['owner']}/{parsed['repo']}"
+            # else:
+            #     record.repository_name = False
 
     def _inverse_repository_name(self):
         for record in self:
@@ -180,3 +186,44 @@ class ResearchPaper(models.Model):
                 f"Cron Job Notice: Paper '{paper.paper_name}' is currently pending publication review."
             )
         return True
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_protected_status(self): 
+        if any(
+            record.paper_status in {'submitted', 'published', 'archived'}
+            for record in self
+        ):
+            raise ValidationError(
+                "A submitted, published, or archived paper cannot be deleted"
+            )
+
+   
+    def write(self, vals):
+        # Lock modification of title, DOI, 
+        # or publication date once a paper is published.
+        protected_fields = {
+            "paper_name",
+            "paper_doi",
+            "paper_publication_date",
+        }
+        
+        if protected_fields.intersection(vals):
+            for record in self:
+                if record.paper_status == "published":
+                    raise ValidationError(
+                        f"Core properties of the paper '{record.paper_name}' "
+                        f"cannot be edited when it is {record.paper_status}."
+                    )
+        return super().write(vals)
+
+    # Override _name_search to allow quick lookup by title, DOI (doi), or journal name (journal).
+    @api.model
+    def _name_search(self, name="", args=None, operator="ilike", limit=100, order=None):
+        args = list(args or [])
+        if name:
+            args += [
+                "|",
+                ("paper_name", operator, name),
+                ("paper_doi", operator, name),
+            ]
+        return self._search(args, limit=limit, order=order)

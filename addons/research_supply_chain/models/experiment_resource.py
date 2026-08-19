@@ -23,6 +23,7 @@ class ExperimentResource(models.Model):
     )
     quantity = fields.Float(
         string="Quantity",
+        digits=(16, 2),
         default=1.0,
     )
 

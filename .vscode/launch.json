@@ -1,0 +1,84 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Odoo: Fast Run Tests (No Reinstall)",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "D:/Program Files D/Odoo 19.0.20260810/python/python.exe",
+      "program": "D:/Program Files D/Odoo 19.0.20260810/server/odoo-bin",
+      "args": [
+        "-c", "${workspaceFolder}/odoo.conf",
+        "--addons-path=D:/Program Files D/Odoo 19.0.20260810/server/odoo/addons,${workspaceFolder}/addons",
+        "-d", "${input:dbName}",
+        "--test-tags", "/research_supply_chain",
+        "--stop-after-init",
+        "--log-level=test"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Odoo: Update Module & Run Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "D:/Program Files D/Odoo 19.0.20260810/python/python.exe",
+      "program": "D:/Program Files D/Odoo 19.0.20260810/server/odoo-bin",
+      "args": [
+        "-c", "${workspaceFolder}/odoo.conf",
+        "--addons-path=D:/Program Files D/Odoo 19.0.20260810/server/odoo/addons,${workspaceFolder}/addons",
+        "-d", "${input:dbName}",
+        "-u", "research_supply_chain",
+        "--test-enable",
+        "--stop-after-init",
+        "--log-level=test"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Odoo: Run Specific Test Tag",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "D:/Program Files D/Odoo 19.0.20260810/python/python.exe",
+      "program": "D:/Program Files D/Odoo 19.0.20260810/server/odoo-bin",
+      "args": [
+        "-c", "${workspaceFolder}/odoo.conf",
+        "--addons-path=D:/Program Files D/Odoo 19.0.20260810/server/odoo/addons,${workspaceFolder}/addons",
+        "-d", "${input:dbName}",
+        "--test-tags", "${input:testTag}",
+        "--stop-after-init",
+        "--log-level=test"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Odoo: Run Server",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "D:/Program Files D/Odoo 19.0.20260810/python/python.exe",
+      "program": "D:/Program Files D/Odoo 19.0.20260810/server/odoo-bin",
+      "args": [
+        "-c", "${workspaceFolder}/odoo.conf",
+        "--addons-path=D:/Program Files D/Odoo 19.0.20260810/server/odoo/addons,${workspaceFolder}/addons",
+        "-d", "${input:dbName}"
+      ],
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "dbName",
+      "type": "promptString",
+      "description": "Enter your Odoo Database Name",
+      "default": "research_test_db"
+    },
+    {
+      "id": "testTag",
+      "type": "promptString",
+      "description": "Enter Odoo Test Tag (e.g. /research_supply_chain:TestRequirements or .test_requirements)",
+      "default": "/research_supply_chain"
+    }
+  ]
+}

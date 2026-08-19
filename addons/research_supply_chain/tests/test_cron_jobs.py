@@ -47,6 +47,7 @@ class TestCronJobs(TransactionCase):
             'name': 'High Performance GPU',
             'priority': 'medium',
             'status': 'requested',
+            'requested_date': fields.Date.today() - timedelta(days=5),
             'needed_by': fields.Date.today() - timedelta(days=2),
         })
         res = self.env['research.requirement'].cron_check_overdue_requirements()

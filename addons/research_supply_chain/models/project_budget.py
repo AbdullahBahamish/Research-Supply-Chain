@@ -219,3 +219,44 @@ class ProjectBudget(models.Model):
                 )
 
         return True
+    
+
+    def write(self, vals):
+        # Enforce validation so spent_amount 
+        # cannot exceed total_budget_amount upon write operations.
+        for record in self: 
+            total_amount = vals.get("total_amount", record.total_amount)
+            spent_amount = vals.get("spent_amount", record.spent_amount)
+            
+            if spent_amount > total_amount:
+                raise ValidationError(
+                    "spent_amount can not exceed total_budget_amount"
+                )
+        return  super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            total_amount = vals.get("total_amount", 0.0)
+            spent_amount = vals.get("spent_amount", 0.0)
+            if spent_amount > total_amount:
+                raise ValidationError(
+                    "Spent amount cannot exceed total allocated budget amount."
+                )
+
+            project_id = vals.get("project_id")
+
+            if project_id: 
+                existing_budget = self.search([("project_id", "=", project_id)], limit=1)
+
+                if existing_budget:
+                    raise ValidationError(
+                        f"The project '{self.env['research.project'].browse(project_id).project_name}' already has a budget assigned."
+                    )
+
+        return super().create(vals_list)
+
+                
+
+                
+

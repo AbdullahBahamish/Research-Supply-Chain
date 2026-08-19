@@ -65,7 +65,7 @@ class ResearchSupplyChainAPIController(http.Controller):
             formatted_data = list(map(lambda p: {
                 'id': p['id'],
                 'code': p['code'],
-                'project_name': p['project_name'].strip().title(),
+                'project_name': (p.get('project_name') or '').strip().title(),
                 'lead_researcher': p['lead_researcher_id'][1] if p.get('lead_researcher_id') else 'Unassigned',
                 'status': p['project_status'],
                 'start_date': p['start_date'],
@@ -153,9 +153,9 @@ class ResearchSupplyChainAPIController(http.Controller):
             )
             
             # Sort by status for itertools.groupby
-            sorted_exps = sorted(experiments, key=lambda x: x['status'])
+            sorted_exps = sorted(experiments, key=lambda x: x.get('status') or '')
             grouped_result = {}
-            for status_key, group in itertools.groupby(sorted_exps, key=lambda x: x['status']):
+            for status_key, group in itertools.groupby(sorted_exps, key=lambda x: x.get('status') or ''):
                 grouped_result[status_key] = list(group)
 
             return {'status': 200, 'count': len(experiments), 'offset': offset, 'limit': limit, 'grouped_by_status': grouped_result, 'data': experiments}

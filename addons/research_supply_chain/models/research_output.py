@@ -20,6 +20,15 @@ class ResearchOutput(models.Model):
         store=True,
         readonly=False,
     )
+    source_ref = fields.Reference(
+        selection=[
+            ("research.project", "Project"),
+            ("research.experiment", "Experiment"),
+            ("research.paper", "Paper"),
+        ],
+        string="Source Reference",
+        help="Optional dynamic reference linking this output to a related entity.",
+    )
     output_type = fields.Selection(
         [
             ("paper", "Paper"),

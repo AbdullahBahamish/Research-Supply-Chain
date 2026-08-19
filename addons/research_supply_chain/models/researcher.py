@@ -81,3 +81,35 @@ class Researcher(models.Model):
                 raise ValidationError(
                     f"The email address '{record.email}' does not appear to be valid."
                 )
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_active_or_principal(self):
+        for record in self: 
+            if record.active or record.is_principal:
+                raise ValidationError(
+                    "You cannot delete an active researcher or research lead."
+                )
+
+    @api.model
+    def _name_search(
+        self,
+        name="",
+        domain=None,
+        operator="ilike",
+        limit=100,
+        order=None,
+    ):
+        domain = list(domain or [])
+        if name:
+            domain += [
+                "|",
+                "|",
+                ("name", operator, name),
+                ("email", operator, name),
+                ("expertise", operator, name),
+            ]
+        return self._search(
+            domain,
+            limit=limit,
+            order=order,
+        )

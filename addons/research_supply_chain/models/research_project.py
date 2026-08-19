@@ -183,13 +183,13 @@ class ResearchProject(models.Model):
     @api.depends("budget_ids.total_amount", "budget_ids.spent_amount", "budget_ids.remaining_amount")
     def _compute_budget_totals(self):
         for project in self:
-            tot = sum(b.total_amount for b in project.budget_ids)
+            total_b = sum(b.total_amount for b in project.budget_ids)
             spent = sum(b.spent_amount for b in project.budget_ids)
             rem = sum(b.remaining_amount for b in project.budget_ids)
-            project.total_budget_amount = tot
+            project.total_budget_amount = total_b
             project.total_spent_amount = spent
             project.remaining_budget_amount = rem
-            project.budget_utilization = (spent / tot * 100.0) if tot else 0.0
+            project.budget_utilization = (spent / total_b * 100.0) if total_b else 0.0
 
     def _inverse_total_budget_amount(self):
         for project in self:
@@ -224,8 +224,10 @@ class ResearchProject(models.Model):
 
     def _inverse_budget_utilization(self):
         for project in self:
-            if project.budget_ids and project.total_budget_amount:
-                project.budget_ids[0].spent_amount = project.total_budget_amount * (project.budget_utilization / 100.0)
+            if project.budget_ids:
+                total_b = project.budget_ids[0].total_amount
+                if total_b:
+                    project.budget_ids[0].spent_amount = total_b * (project.budget_utilization / 100.0)
 
     @api.depends("experiment_ids", "paper_ids")
     def _compute_counts(self):
@@ -328,15 +330,31 @@ class ResearchProject(models.Model):
 
     def action_get_functional_summary(self):
         self.ensure_one()
-        completed_exps = list(filter(lambda exp: exp.status == "completed", self.experiment_ids))
-        completed_names = list(map(lambda exp: exp.name.upper(), completed_exps))
-        total_req_qty = sum(req.quantity for req in self.requirement_ids)
+        # completed_exps = list(filter(lambda exp: exp.status == "completed", self.experiment_ids))
+        # completed_names = list(map(lambda exp: exp.name.upper(), completed_exps))
+        # total_req_qty = sum(req.quantity for req in self.requirement_ids)
+
+        # return {
+        #     "completed_count": len(completed_exps),
+        #     "completed_names": completed_names,
+        #     "total_requirements_quantity": total_req_qty,
+        # }
+
+        completed_exps = self.experiment_ids.filtered(lambda exp: exp.status == "completed")
 
         return {
             "completed_count": len(completed_exps),
-            "completed_names": completed_names,
-            "total_requirements_quantity": total_req_qty,
+            "completed_names": completed_exps.mapped(lambda exp: exp.name.upper()),
+            "total_req_qty": sum(self.requirement_ids.mapped('quantity')),
         }
+
+    def unlink(self):
+        if self.filtered(
+            lambda project: project.project_status in {"in_progress", "completed"}
+        ):
+            raise ValidationError("Project cannot be deleted because it is in progress or completed.")
+
+        return super().unlink()    
 
     @api.model
     def cron_update_project_statuses(self):
@@ -370,3 +388,31 @@ class ResearchProject(models.Model):
         if name:
             domain = ["|", ("project_name", operator, name), ("code", operator, name)] + domain
         return self._search(domain, limit=limit, order=order)
+
+
+    # Prevent editing core project properties when status is completed or archived,
+    # and log system audit entries when state/budget fields change.
+    # @api.onchange()
+    # def _onchange_core_properties(self):
+    #     for record in self: 
+    #         if record.status in ['completed', 'archived']:
+    #             raise ValidationError(f"Core properties of a project cannot be edited when the project is {record.status}")
+
+    def write(self, vals):
+        protected_fields = {
+            "project_name",
+            "project_description",
+            "visibility",
+            "lead_researcher_id",
+            "start_date",
+            "end_date",
+        }
+        
+        if protected_fields.intersection(vals):
+            for record in self:
+                if record.project_status in {"completed", "archived"}:
+                    raise ValidationError(
+                        f"Core properties of project '{record.project_name}' "
+                        f"cannot be edited when it is {record.project_status}."
+                    )
+        return super().write(vals)

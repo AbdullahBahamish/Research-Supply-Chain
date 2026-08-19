@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Root Menu -->
-    <menuitem
-        id="menu_research_supply_chain_root"
-        name="Research Supply Chain"
-        web_icon="research_supply_chain,static/description/icon.png"
-        sequence="10"
-    />
-
     <!-- Client Action: OWL Research Dashboard -->
     <record id="action_research_dashboard" model="ir.actions.client">
         <field name="name">Dashboard</field>
@@ -132,13 +124,6 @@
     />
 
     <!-- Tools Category -->
-    <menuitem
-        id="menu_tools"
-        name="Tools"
-        parent="menu_research_supply_chain_root"
-        sequence="60"
-        groups="research_supply_chain.group_research_admin"
-    />
     <menuitem
         id="menu_generate_sample_data"
         name="Generate Sample Data"

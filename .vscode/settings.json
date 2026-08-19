@@ -6,5 +6,10 @@
     "D:/Program Files D/Odoo 19.0.20260810/server"
   ],
   "xml.symbols.enabled": false,
-  "python.languageServer": "None"
+  "python.languageServer": "None",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "--ignore=addons"
+  ],
+  "python.testing.unittestEnabled": false
 }

@@ -26,8 +26,9 @@
         "views/research_output_views.xml",
         "views/project_tag_views.xml",
         "views/research_paper_views.xml",
-        "views/sample_data_wizard_views.xml",
         "views/research_project_views.xml",
+        "views/research_menu_root.xml",
+        "views/sample_data_wizard_views.xml",
         "views/research_supply_chain_menus.xml",
     ],
     "demo": [

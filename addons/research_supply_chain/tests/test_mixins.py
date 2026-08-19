@@ -12,10 +12,12 @@ class TestMixins(TransactionCase):
         self.project_2 = self.env["research.project"].create({
             "project_name": "Mixin Test Project Beta",
             "project_status": "in_progress",
+            "start_date": "2026-01-01",
         })
         self.project_3 = self.env["research.project"].create({
             "project_name": "Mixin Test Project Gamma",
             "project_status": "in_progress",
+            "start_date": "2026-01-01",
         })
 
     def test_01_audit_mixin_log_system_event(self):

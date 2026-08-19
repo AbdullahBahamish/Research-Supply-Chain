@@ -103,9 +103,38 @@ class ResearchAuditMixin(models.AbstractModel):
             current_log = record.audit_notes or ""
             log_lines = current_log.strip().split("\n") if current_log.strip() else []
             updated_lines = [new_entry] + log_lines[:29]
-            record.audit_notes = "\n".join(updated_lines) + "\n"
+            # record.audit_notes = "\n".join(updated_lines) + "\n"
+            super(ResearchAuditMixin, record).write({
+                "audit_notes": "\n".join(updated_lines) + "\n"  # type: ignore
+            })
+    
 
+    def write(self, vals):
+        # Exclude internal audit logging updates from triggering recursive audit trails
+        if set(vals.keys()) == {"audit_notes"}:
+            return super().write(vals)
 
+        tracked_fields = [k for k in vals.keys() if k != "audit_notes"]
+        res = super().write(vals)
+
+        if tracked_fields:
+            user_name = self.env.user.name
+            mutated_keys = ", ".join(tracked_fields)
+            for record in self:
+                msg = f"Record mutated by {user_name}. Altered fields: [{mutated_keys}]"
+                record._log_system_event(msg)
+
+        return res
+
+    def unlink(self):
+        user_name = self.env.user.name
+        for record in self:
+            rec_identifier = getattr(record, "display_name", f"ID {record.id}")
+            _logger.info(
+                f"Permanent deletion executed by {user_name} on model {record._name}: {rec_identifier}"
+            )
+        return super().unlink()
+        
     @classmethod
     def increment_audit_counter(cls):
         """Class method accessing class-level state."""
@@ -154,3 +183,5 @@ class ExportableDataMixin(models.AbstractModel):
                 "names": names,
             }
         return summary
+
+

@@ -53,6 +53,7 @@ class ResearchRequirement(models.Model):
     )
     quantity = fields.Float(
         string="Quantity",
+        digits=(16, 2),
         default=1.0,
     )
     priority = fields.Selection(
@@ -116,16 +117,19 @@ class ResearchRequirement(models.Model):
 
     @api.constrains("parent_id")
     def _check_parent_recursion(self):
-        for record in self:
-            has_cycle = (
-                record._has_cycle("parent_id")
-                if hasattr(record, "_has_cycle")
-                else not record._check_recursion("parent_id")
-            )
-            if has_cycle:
-                raise ValidationError(
-                    f"Requirement '{record.name}' cannot be its own parent or cause a circular hierarchy loop."
-                )
+        if not self._check_recursion():
+            raise ValidationError("Requirement cannot be its own parent")
+        
+        # for record in self:
+        #     has_cycle = (
+        #         record._has_cycle("parent_id")
+        #         if hasattr(record, "_has_cycle")
+        #         else not record._check_recursion("parent_id")
+        #     )
+        #     if has_cycle:
+        #         raise ValidationError(
+        #             f"Requirement '{record.name}' cannot be its own parent or cause a circular hierarchy loop."
+        #         )
 
     @api.onchange("category")
     def _onchange_category(self):
@@ -204,3 +208,25 @@ class ResearchRequirement(models.Model):
             if hasattr(record, "_log_system_event"):
                 record._log_system_event(f"Requirement '{record.name}' reset to requested state.")
         return True
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_protected_status(self):
+        protected_status = {"approved", "fulfilled"}
+        if any(record.status in protected_status for record in self):
+            raise ValidationError(
+                "Cannot delete a requirement that has already been approved or fulfilled."
+            )
+        return True
+
+    def write(self, vals):
+        # Prevent modifying requirement properties once the status 
+        # is fulfilled or approved, while allowing status transitions.
+        for record in self:
+            if record.status in {"approved", "fulfilled"}:
+                non_status_fields = set(vals.keys()) - {"status"}
+                if non_status_fields:
+                    raise ValidationError(
+                        f"Cannot modify requirement properties once it has been {record.status}."
+                    )
+        return super().write(vals)
+        

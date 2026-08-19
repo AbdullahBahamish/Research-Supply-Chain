@@ -1,4 +1,5 @@
 from odoo import api, fields, models  # type: ignore  # pyfly: ignore [missing-import]
+from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
 
 
 class Experiment(models.Model):
@@ -171,6 +172,10 @@ class Experiment(models.Model):
             record.check_access_rule("write")
             if record.status != "planned":
                 continue
+            if not record.objective or not record.objective.strip():
+                raise ValidationError(
+                    f"An objective is required before experiment '{record.name}' can be started."
+                )
             if not record.start_date:
                 record.start_date = fields.Date.context_today(record)
             record.status = "running"
@@ -201,3 +206,12 @@ class Experiment(models.Model):
             if hasattr(record, "message_post"):
                 record.message_post(body=f"Experiment '{record.name}' cancelled.")
         return True
+
+    # : Add a @api.model_create_multi create override to auto-generate 
+    # experiment sequence codes (e.g., EXP-0001).
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     if not vals_list: 
+    #         raise ValueError("Experiment code must be set.")
+    #     for vals in vals_list:
+    #         vals["code"] = self.env["ir.sequence"].next_by_code("research.experiment")

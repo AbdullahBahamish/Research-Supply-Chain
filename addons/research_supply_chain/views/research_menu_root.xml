@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root Menu -->
+    <menuitem
+        id="menu_research_supply_chain_root"
+        name="Research Supply Chain"
+        web_icon="research_supply_chain,static/description/icon.png"
+        sequence="10"
+    />
+
+    <!-- Tools Category -->
+    <menuitem
+        id="menu_tools"
+        name="Tools"
+        parent="menu_research_supply_chain_root"
+        sequence="60"
+        groups="research_supply_chain.group_research_admin"
+    />
+
+</odoo>
