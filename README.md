@@ -3,6 +3,8 @@
 [![Odoo Version](https://img.shields.io/badge/Odoo-19.0%20Enterprise%20%2F%20Community-purple.svg)](https://www.odoo.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](file:///d:/Center/Github_Profile/Research-Supply-Chain/LICENSE)
 [![Python Architecture](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/AbdullahBahamish/Research-Supply-Chain)
+
 
 An enterprise-grade **Odoo 19** module designed for managing the full operational lifecycle of scientific research projects, team member allocations, material & computational requirements, shared physical resources, experimental runs, project budgets, deliverables, and academic publication tracking.
 
@@ -12,14 +14,14 @@ An enterprise-grade **Odoo 19** module designed for managing the full operationa
 
 Comprehensive technical documentation is maintained in the **[`docs/`](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/)** directory:
 
-- **[Documentation Index](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/INDEX.md)** — Main documentation hub & executive system overview.
-- **[Architecture & System Design](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/ARCHITECTURE.md)** — Core system layers, Mermaid ER diagram, security rules, and design patterns.
-- **[Data Models Specification](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/DATA_MODELS.md)** — Exhaustive field-by-field reference for all custom Odoo models, constraints, and mixins.
-- **[Advanced Python Concepts Guide](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/PYTHON_CONCEPTS_GUIDE.md)** — Hands-on guide covering OOP mixins, decorators, regex validation, generators, itertools, and error handling.
-- **[API Specification & Reference](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/API_DOCUMENTATION.md)** — REST & JSON-RPC API endpoints, input sanitization rules, and response payloads.
-- **[Postman API Testing Guide](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/POSTMAN_API_GUIDE.md)** — Postman collection setup, cookie authentication, and test runner guide.
-- **[Testing & Synthetic Data Guide](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/TESTING_AND_DATA_GENERATION.md)** — Automated test suite execution, Python generator script, and UI Wizard manual.
-- **[Getting Started & Operations](file:///d:/Center/Github_Profile/Research-Supply-Chain/docs/GETTING_STARTED.md)** — Installation, environment setup, deployment workflows, and troubleshooting.
+- **[Documentation Index](docs/INDEX.md)** — Main documentation hub & executive system overview.
+- **[Architecture & System Design](docs/ARCHITECTURE.md)** — Core system layers, Mermaid ER diagram, security rules, and design patterns.
+- **[Data Models Specification](docs/DATA_MODELS.md)** — Exhaustive field-by-field reference for all custom Odoo models, constraints, and mixins.
+- **[Advanced Python Concepts Guide](docs/PYTHON_CONCEPTS_GUIDE.md)** — Hands-on guide covering OOP mixins, decorators, regex validation, generators, itertools, and error handling.
+- **[API Specification & Reference](docs/API_DOCUMENTATION.md)** — REST & JSON-RPC API endpoints, input sanitization rules, and response payloads.
+- **[Postman API Testing Guide](docs/POSTMAN_API_GUIDE.md)** — Postman collection setup, cookie authentication, and test runner guide.
+- **[Testing & Synthetic Data Guide](docs/TESTING_AND_DATA_GENERATION.md)** — Automated test suite execution, Python generator script, and UI Wizard manual.
+- **[Getting Started & Operations](docs/GETTING_STARTED.md)** — Installation, environment setup, deployment workflows, and troubleshooting.
 
 ---
 
@@ -111,4 +113,4 @@ Run the automated test suite directly using the standard Odoo testing runner:
 ---
 
 ## License
-Distributed under the **MIT License**. See [`LICENSE`](file:///d:/Center/Github_Profile/Research-Supply-Chain/LICENSE) for details.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
