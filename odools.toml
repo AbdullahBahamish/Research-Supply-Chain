@@ -2,16 +2,15 @@
 name = "default"
 extends = ""
 
-odoo_path = "D:\\Program Files D\\Odoo 19.0.20260810\\server"
+odoo_path = ""
 
 addons_paths = [
-    "D:\\Program Files D\\Odoo 19.0.20260810\\server\\odoo\\addons",
-    "D:\\Center\\Github_Profile\\Research-Supply-Chain\\addons"
+    "addons"
 ]
 
 addons_merge = "merge"
 
-python_path = "D:\\Program Files D\\Odoo 19.0.20260810\\python\\python.exe"
+python_path = ""
 
 stdlib = ""
 

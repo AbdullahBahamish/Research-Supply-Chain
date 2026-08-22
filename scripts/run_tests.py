@@ -10,8 +10,8 @@ import argparse
 import configparser
 import subprocess
 
-DEFAULT_ODOO_PATH = r"D:\Program Files D\Odoo 19.0.20260810\server"
-DEFAULT_PYTHON_PATH = r"D:\Program Files D\Odoo 19.0.20260810\python\python.exe"
+DEFAULT_ODOO_PATH = os.environ.get("ODOO_PATH", "")
+DEFAULT_PYTHON_PATH = os.environ.get("PYTHON_PATH", sys.executable)
 DEFAULT_MODULE = "research_supply_chain"
 
 def get_db_from_conf(conf_path):

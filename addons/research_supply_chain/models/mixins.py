@@ -183,5 +183,3 @@ class ExportableDataMixin(models.AbstractModel):
                 "names": names,
             }
         return summary
-
-

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_research_project" model="ir.actions.report">
+        <field name="name">Research Project Summary</field>
+        <field name="model">research.project</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">research_supply_chain.report_research_project_document</field>
+        <field name="binding_model_id" ref="model_research_project"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_research_project_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-foreach="docs" t-as="project">
+                    <div class="page">
+                        <h2 t-esc="project.project_name"/>
+                        <p>Code: <strong t-esc="project.code"/></p>
+                        <p>Status: <strong t-esc="project.project_status"/></p>
+                        <p>Lead: <strong t-esc="project.lead_researcher_id.name or 'N/A'"/></p>
+                        <p>Budget: <strong t-esc="project.total_budget_amount"/> / Spent: <strong t-esc="project.total_spent_amount"/></p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

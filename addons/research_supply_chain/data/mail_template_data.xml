@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="mail_template_project_started" model="mail.template">
+            <field name="name">Research Project: Started</field>
+            <field name="model_id" ref="model_research_project"/>
+            <field name="subject">Project {{ object.project_name }} has started</field>
+            <field name="body_html"><![CDATA[
+                <p>Dear {{ object.lead_researcher_id.name }},</p>
+                <p>Your project <strong>{{ object.project_name }}</strong> ({{ object.code }}) is now <em>In Progress</em>.</p>
+            ]]></field>
+            <field name="email_to">{{ object.lead_researcher_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>

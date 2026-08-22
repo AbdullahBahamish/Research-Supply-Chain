@@ -1,3 +1,4 @@
+from datetime import timedelta
 from odoo import api, fields, models  # type: ignore  # pyfly: ignore [missing-import]
 from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [missing-import]
 
@@ -9,6 +10,11 @@ class Experiment(models.Model):
     _rec_name = "name"
     _order = "status, start_date desc, name"
 
+    code = fields.Char(
+        string="Experiment Code",
+        readonly=True,
+        copy=False,
+    )
     project_id = fields.Many2one(
         "research.project",
         string="Project",
@@ -181,6 +187,14 @@ class Experiment(models.Model):
             record.status = "running"
             if hasattr(record, "message_post"):
                 record.message_post(body=f"Experiment '{record.name}' started.")
+            if hasattr(record, "activity_schedule"):
+                record.activity_schedule(
+                    "mail.mail_activity_data_todo",
+                    date_deadline=fields.Date.context_today(record) + timedelta(days=7),
+                    summary="Experiment Progress Review",
+                    note=f"Review progress for experiment: {record.name}",
+                    user_id=record.owner_id.id if record.owner_id else self.env.uid,
+                )
         return True
 
     def action_complete(self):
@@ -207,11 +221,12 @@ class Experiment(models.Model):
                 record.message_post(body=f"Experiment '{record.name}' cancelled.")
         return True
 
-    # : Add a @api.model_create_multi create override to auto-generate 
-    # experiment sequence codes (e.g., EXP-0001).
-    # @api.model_create_multi
-    # def create(self, vals_list):
-    #     if not vals_list: 
-    #         raise ValueError("Experiment code must be set.")
-    #     for vals in vals_list:
-    #         vals["code"] = self.env["ir.sequence"].next_by_code("research.experiment")
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("code"):
+                vals["code"] = (
+                    self.env["ir.sequence"].next_by_code("research.experiment")
+                    or "New"
+                )
+        return super().create(vals_list)

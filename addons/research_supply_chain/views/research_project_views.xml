@@ -187,10 +187,11 @@
     </record>
 
     <!-- Research Project Pivot View -->
+    <!-- NOTE: ir.ui.view no longer supports groups_id in Odoo 19.
+         Access is controlled at the action/menu level via group attributes. -->
     <record id="view_research_project_pivot" model="ir.ui.view">
         <field name="name">research.project.pivot</field>
         <field name="model">research.project</field>
-        <field name="group_ids" eval="[(4, ref('research_supply_chain.group_research_lead')), (4, ref('research_supply_chain.group_research_manager')), (4, ref('research_supply_chain.group_research_admin'))]"/>
         <field name="arch" type="xml">
             <pivot string="Projects Analysis">
                 <field name="project_status" type="row"/>
@@ -225,6 +226,7 @@
                 <filter name="proposed" string="Proposed" domain="[('project_status', '=', 'proposed')]"/>
                 <filter name="approved" string="Approved" domain="[('project_status', '=', 'approved')]"/>
                 <filter name="completed" string="Completed" domain="[('project_status', '=', 'completed')]"/>
+                <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
                 <separator/>
                 <filter name="public" string="Public Projects" domain="[('visibility', '=', 'public')]"/>
                 <filter name="private" string="Private Projects" domain="[('visibility', '=', 'private')]"/>

@@ -158,6 +158,12 @@ class ResearchProject(models.Model):
         inverse="_inverse_paper_count",
         aggregator="sum",
     )
+    is_overdue = fields.Boolean(
+        string="Is Overdue",
+        compute="_compute_is_overdue",
+        search="_search_is_overdue",
+        store=False,
+    )
 
     _code_unique = models.Constraint(
         "UNIQUE(code)",
@@ -208,6 +214,7 @@ class ResearchProject(models.Model):
             elif project.total_spent_amount:
                 self.env["project.budget"].create({
                     "project_id": project.id,
+                    "total_amount": max(project.total_budget_amount, project.total_spent_amount),
                     "spent_amount": project.total_spent_amount,
                 })
 
@@ -218,7 +225,7 @@ class ResearchProject(models.Model):
             elif project.remaining_budget_amount:
                 self.env["project.budget"].create({
                     "project_id": project.id,
-                    "total_amount": project.remaining_budget_amount,
+                    "total_amount": max(project.total_budget_amount, project.remaining_budget_amount),
                     "spent_amount": 0.0,
                 })
 
@@ -262,6 +269,30 @@ class ResearchProject(models.Model):
             elif 0 <= target_count < current_count:
                 to_remove = project.paper_ids[target_count:]
                 to_remove.unlink()
+
+    @api.depends("project_status", "end_date")
+    def _compute_is_overdue(self):
+        today = fields.Date.context_today(self)
+        for project in self:
+            project.is_overdue = (
+                project.project_status == "in_progress"
+                and bool(project.end_date)
+                and project.end_date < today
+            )
+
+    def _search_is_overdue(self, operator, value):
+        today = fields.Date.context_today(self)
+        if (operator == "=" and value) or (operator == "!=" and not value):
+            return [
+                ("project_status", "=", "in_progress"),
+                ("end_date", "!=", False),
+                ("end_date", "<", today),
+            ]
+        return [
+            "|",
+            ("project_status", "!=", "in_progress"),
+            ("end_date", ">=", today),
+        ]
 
     @api.onchange("start_date", "end_date")
     def _onchange_dates(self):
@@ -364,11 +395,17 @@ class ResearchProject(models.Model):
             ("start_date", "!=", False),
             ("start_date", "<=", today),
         ])
+        template = self.env.ref(
+            "research_supply_chain.mail_template_project_started",
+            raise_if_not_found=False,
+        )
         for project in starting_projects:
             project.project_status = "in_progress"
             project._log_system_event(
                 f"Cron Job: Project status automatically updated to 'In Progress' (Start Date: {project.start_date})."
             )
+            if template and project.lead_researcher_id:
+                template.send_mail(project.id, force_send=False)
 
         overdue_projects = self.search([
             ("project_status", "=", "in_progress"),

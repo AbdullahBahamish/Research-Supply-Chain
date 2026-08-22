@@ -154,6 +154,10 @@ class ResearchPaper(models.Model):
             record.check_access_rule("write")
             if record.paper_status not in ["submitted", "draft"]:
                 continue
+            if not record.paper_doi or not record.paper_doi.strip():
+                raise ValidationError(
+                    f"A valid DOI is required before paper '{record.paper_name}' can be published."
+                )
             if not record.paper_publication_date:
                 record.paper_publication_date = fields.Date.context_today(record)
             record.paper_status = "published"
@@ -218,12 +222,12 @@ class ResearchPaper(models.Model):
 
     # Override _name_search to allow quick lookup by title, DOI (doi), or journal name (journal).
     @api.model
-    def _name_search(self, name="", args=None, operator="ilike", limit=100, order=None):
-        args = list(args or [])
+    def _name_search(self, name="", domain=None, operator="ilike", limit=100, order=None):
+        domain = list(domain or [])
         if name:
-            args += [
+            domain += [
                 "|",
                 ("paper_name", operator, name),
                 ("paper_doi", operator, name),
             ]
-        return self._search(args, limit=limit, order=order)
+        return self._search(domain, limit=limit, order=order)

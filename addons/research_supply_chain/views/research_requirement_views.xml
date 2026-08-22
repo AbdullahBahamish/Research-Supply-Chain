@@ -37,6 +37,11 @@
                             <field name="requested_date" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
                             <field name="needed_by" readonly="status in ('approved', 'fulfilled', 'cancelled')"/>
                         </group>
+                        <group string="Approval Details" invisible="status == 'requested'">
+                            <field name="approver_id"/>
+                            <field name="approval_date"/>
+                            <field name="approval_note"/>
+                        </group>
                     </group>
 
                     <notebook>
@@ -56,6 +61,7 @@
                         </page>
                     </notebook>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>

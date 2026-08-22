@@ -9,4 +9,13 @@
         <field name="padding">1</field>  
     </record>
 
+    <record id="seq_research_experiment" model="ir.sequence">
+        <field name="name">Research Experiment</field>
+        <field name="code">research.experiment</field>
+        <field name="prefix">EXP-</field>
+        <field name="padding">4</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
 </odoo>

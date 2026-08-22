@@ -18,6 +18,7 @@
         "security/ir.model.access.csv",
         "data/research_supply_chain_data.xml",
         "data/ir_cron_data.xml",
+        "data/mail_template_data.xml",
         "views/researcher_views.xml",
         "views/project_budget_views.xml",
         "views/research_requirement_views.xml",
@@ -28,7 +29,9 @@
         "views/research_paper_views.xml",
         "views/research_project_views.xml",
         "views/research_menu_root.xml",
+        "views/research_tools_menu.xml",
         "views/sample_data_wizard_views.xml",
+        "views/report_research_project.xml",
         "views/research_supply_chain_menus.xml",
     ],
     "demo": [

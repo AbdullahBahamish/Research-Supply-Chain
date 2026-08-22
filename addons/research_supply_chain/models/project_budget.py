@@ -232,7 +232,7 @@ class ProjectBudget(models.Model):
                 raise ValidationError(
                     "spent_amount can not exceed total_budget_amount"
                 )
-        return  super().write(vals)
+        return super().write(vals)
 
     @api.model_create_multi
     def create(self, vals_list):

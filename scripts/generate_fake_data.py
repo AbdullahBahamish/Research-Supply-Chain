@@ -167,7 +167,7 @@ def generate_all_fake_data(env, num_projects=5, num_researchers=8):
                 'methodology': "Execute randomized operational cycles across 5 test iterations.",
                 'status': exp_status,
                 'start_date': start_d,
-                'created_by': env.uid,
+                'owner_id': env.uid,
             })
 
             # Allocate resource to experiment

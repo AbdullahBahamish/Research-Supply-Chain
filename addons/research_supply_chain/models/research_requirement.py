@@ -4,6 +4,7 @@ from odoo.exceptions import ValidationError  # type: ignore  # pyfly: ignore [mi
 
 class ResearchRequirement(models.Model):
     _name = "research.requirement"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Research Requirement"
     _rec_name = "name"
     _order = "priority desc, needed_by asc, name"
@@ -66,6 +67,7 @@ class ResearchRequirement(models.Model):
         default="medium",
         required=True,
         index=True,
+        tracking=True,
     )
     status = fields.Selection(
         [
@@ -78,6 +80,7 @@ class ResearchRequirement(models.Model):
         default="requested",
         required=True,
         index=True,
+        tracking=True,
     )
     requested_date = fields.Date(
         string="Requested Date",
@@ -100,6 +103,21 @@ class ResearchRequirement(models.Model):
         "research.requirement",
         "parent_id",
         string="Child Requirements",
+    )
+    approver_id = fields.Many2one(
+        "res.users",
+        string="Approver",
+        index=True,
+        tracking=True,
+        readonly=True,
+    )
+    approval_date = fields.Datetime(
+        string="Approval Date",
+        readonly=True,
+        copy=False,
+    )
+    approval_note = fields.Text(
+        string="Approval Note",
     )
 
     _check_positive_quantity = models.Constraint(
@@ -171,9 +189,13 @@ class ResearchRequirement(models.Model):
             record.check_access_rule("write")
             if record.status != "requested":
                 continue
-            record.status = "approved"
+            record.write({
+                "status": "approved",
+                "approver_id": self.env.user.id,
+                "approval_date": fields.Datetime.now(),
+            })
             if hasattr(record, "_log_system_event"):
-                record._log_system_event(f"Requirement '{record.name}' approved for project procurement.")
+                record._log_system_event(f"Requirement '{record.name}' approved for project procurement by {self.env.user.name}.")
         return True
 
     def action_fulfill(self):
@@ -220,13 +242,15 @@ class ResearchRequirement(models.Model):
 
     def write(self, vals):
         # Prevent modifying requirement properties once the status 
-        # is fulfilled or approved, while allowing status transitions.
+        # is fulfilled or approved, while allowing status transitions and approval metadata.
+        allowed_locked_fields = {"status", "approver_id", "approval_date", "approval_note"}
         for record in self:
             if record.status in {"approved", "fulfilled"}:
-                non_status_fields = set(vals.keys()) - {"status"}
+                non_status_fields = set(vals.keys()) - allowed_locked_fields
                 if non_status_fields:
                     raise ValidationError(
                         f"Cannot modify requirement properties once it has been {record.status}."
                     )
         return super().write(vals)
+
         

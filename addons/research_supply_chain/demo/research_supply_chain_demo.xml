@@ -49,6 +49,32 @@
         <field name="is_principal">False</field>
     </record>
 
+    <!-- Project Tag Demo Data -->
+    <record id="demo_tag_ai" model="research.project.tag">
+        <field name="name">AI &amp; Machine Learning</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="demo_tag_quantum" model="research.project.tag">
+        <field name="name">Quantum Computing</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="demo_tag_genomics" model="research.project.tag">
+        <field name="name">Genomics &amp; Bio</field>
+        <field name="color">3</field>
+    </record>
+
+    <record id="demo_tag_logistics" model="research.project.tag">
+        <field name="name">Logistics &amp; Robotics</field>
+        <field name="color">4</field>
+    </record>
+
+    <record id="demo_tag_priority" model="research.project.tag">
+        <field name="name">High Priority</field>
+        <field name="color">5</field>
+    </record>
+
     <!-- Project Demo Data -->
     <record id="demo_project_1" model="research.project">
         <field name="project_name">AI-Driven Supply Chain Optimization</field>
@@ -57,6 +83,7 @@
         <field name="start_date">2026-01-01</field>
         <field name="end_date">2026-12-31</field>
         <field name="project_status">in_progress</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('demo_tag_ai'), ref('demo_tag_priority')])]"/>
     </record>
 
     <record id="demo_project_2" model="research.project">
@@ -66,6 +93,7 @@
         <field name="start_date">2026-02-15</field>
         <field name="end_date">2027-02-14</field>
         <field name="project_status">approved</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('demo_tag_quantum')])]"/>
     </record>
 
     <record id="demo_project_3" model="research.project">
@@ -75,6 +103,7 @@
         <field name="start_date">2025-09-01</field>
         <field name="end_date">2026-08-31</field>
         <field name="project_status">in_progress</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('demo_tag_genomics')])]"/>
     </record>
 
     <record id="demo_project_4" model="research.project">
@@ -84,6 +113,7 @@
         <field name="start_date">2026-04-01</field>
         <field name="end_date">2026-10-31</field>
         <field name="project_status">proposed</field>
+        <field name="tag_ids" eval="[(6, 0, [ref('demo_tag_logistics'), ref('demo_tag_priority')])]"/>
     </record>
 
     <!-- Project Researcher Team Allocation -->
@@ -339,6 +369,417 @@
         <field name="paper_abstract">An end-to-end biological specimen tracking framework using distributed ledger technology and real-time streaming genomic alignment.</field>
         <field name="paper_github_url">https://github.com/example/genomic-supply-chain</field>
     </record>
+    <!-- ====================================================================
+         ADDITIONAL PROJECT TEAM MEMBERS
+         Projects 3 and 4 were thin/empty on team members.
+         Constraint: UNIQUE(project_id, researcher_id) — each combo only once.
+         researcher_2 is only in project_1 so far → safe to add to 2, 3.
+         researcher_1 and researcher_4 are not yet in project_4 → safe.
+         ==================================================================== -->
+
+    <!-- researcher_2 (Carol) as Data Pipeline Engineer on project_2 -->
+    <record id="demo_project_researcher_5" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="researcher_id" ref="demo_researcher_2"/>
+        <field name="role">Data Pipeline Engineer</field>
+        <field name="allocated_pct">60.0</field>
+        <field name="join_date">2026-02-20</field>
+    </record>
+
+    <!-- researcher_1 (admin/PI) as Lead Investigator on project_4 -->
+    <record id="demo_project_researcher_6" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="researcher_id" ref="demo_researcher_1"/>
+        <field name="role">Lead Investigator</field>
+        <field name="allocated_pct">60.0</field>
+        <field name="join_date">2026-04-01</field>
+    </record>
+
+    <!-- researcher_4 (Bob) as Technical Advisor on project_4 -->
+    <record id="demo_project_researcher_7" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="researcher_id" ref="demo_researcher_4"/>
+        <field name="role">Technical Advisor</field>
+        <field name="allocated_pct">40.0</field>
+        <field name="join_date">2026-04-05</field>
+    </record>
+
+    <!-- researcher_3 (Alice) as Bioinformatics Consultant on project_1 -->
+    <record id="demo_project_researcher_8" model="research.project.researcher">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="researcher_id" ref="demo_researcher_3"/>
+        <field name="role">Data Science Consultant</field>
+        <field name="allocated_pct">25.0</field>
+        <field name="join_date">2026-03-01</field>
+    </record>
+
+
+    <!-- ====================================================================
+         ADDITIONAL REQUIREMENTS
+         Covers: all 6 categories, all 4 statuses, child hierarchy, project_4.
+         IMPORTANT: Status is set at create-time — write() override blocks
+         modifying approved/fulfilled requirements after creation.
+         ==================================================================== -->
+
+    <!-- project_4 — software requirement (drone control system) -->
+    <record id="demo_requirement_4" model="research.requirement">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="name">Autonomous Drone Flight Control Software Suite</field>
+        <field name="category">software</field>
+        <field name="description">Commercial-grade UAV autonomy stack with PX4 autopilot integration and geofencing modules.</field>
+        <field name="quantity">3.0</field>
+        <field name="priority">high</field>
+        <field name="status">requested</field>
+        <field name="requested_date">2026-04-05</field>
+        <field name="needed_by">2026-05-01</field>
+    </record>
+
+    <!-- project_4 — dataset requirement (GPS training data) -->
+    <record id="demo_requirement_5" model="research.requirement">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="name">Campus GPS Ground-Truth Route Dataset</field>
+        <field name="category">dataset</field>
+        <field name="description">High-accuracy RTK-GPS route recording dataset for training the autonomous pathfinding model.</field>
+        <field name="quantity">1.0</field>
+        <field name="priority">medium</field>
+        <field name="status">approved</field>
+        <field name="requested_date">2026-04-08</field>
+        <field name="needed_by">2026-04-30</field>
+        <field name="approval_note">Dataset procurement approved by Research Manager. Budget allocated from project reserve.</field>
+    </record>
+
+    <!-- project_1 — expertise requirement (ML consulting), fulfilled -->
+    <record id="demo_requirement_6" model="research.requirement">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="name">External Graph Neural Network Architecture Consulting</field>
+        <field name="category">expertise</field>
+        <field name="description">10-hour consulting engagement with an external GNN specialist for architecture review.</field>
+        <field name="quantity">10.0</field>
+        <field name="priority">medium</field>
+        <field name="status">fulfilled</field>
+        <field name="requested_date">2026-01-15</field>
+        <field name="needed_by">2026-03-01</field>
+        <field name="approval_note">Approved and fulfilled — Dr. Chen consulted on Feb 20, 2026.</field>
+    </record>
+
+    <!-- project_2 — hardware requirement, cancelled -->
+    <record id="demo_requirement_7" model="research.requirement">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="name">Classical HPC Cluster Fallback Node</field>
+        <field name="category">hardware</field>
+        <field name="description">Classical compute nodes requested as fallback for quantum circuit simulation. Cancelled after QPU allocation confirmed.</field>
+        <field name="quantity">4.0</field>
+        <field name="priority">low</field>
+        <field name="status">cancelled</field>
+        <field name="requested_date">2026-02-25</field>
+        <field name="needed_by">2026-04-01</field>
+    </record>
+
+    <!-- project_3 — software requirement (parent) -->
+    <record id="demo_requirement_8" model="research.requirement">
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="name">Bioinformatics Pipeline Software Licenses</field>
+        <field name="category">software</field>
+        <field name="description">Commercial licenses for GATK, Nextflow, and SeqKit required for genomic data processing pipeline.</field>
+        <field name="quantity">5.0</field>
+        <field name="priority">high</field>
+        <field name="status">requested</field>
+        <field name="requested_date">2025-09-15</field>
+        <field name="needed_by">2025-11-01</field>
+    </record>
+
+    <!-- project_3 — child requirement under demo_requirement_8 -->
+    <record id="demo_requirement_8_child" model="research.requirement">
+        <field name="project_id" ref="demo_project_3"/>
+        <field name="name">GATK4 Academic License Sub-requirement</field>
+        <field name="category">software</field>
+        <field name="description">Sub-task: procure GATK4 academic license separately from the main software bundle.</field>
+        <field name="quantity">1.0</field>
+        <field name="priority">high</field>
+        <field name="status">requested</field>
+        <field name="parent_id" ref="demo_requirement_8"/>
+        <field name="requested_date">2025-09-20</field>
+        <field name="needed_by">2025-10-15</field>
+    </record>
+
+    <!-- project_1 — other requirement -->
+    <record id="demo_requirement_9" model="research.requirement">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="name">Cloud API Access for OpenAI Embedding Models</field>
+        <field name="category">service</field>
+        <field name="description">API quota and credentials for embedding supply chain text data using OpenAI API.</field>
+        <field name="quantity">1000000.0</field>
+        <field name="priority">low</field>
+        <field name="status">approved</field>
+        <field name="requested_date">2026-02-01</field>
+        <field name="needed_by">2026-03-01</field>
+        <field name="approval_note">Approved. Budget covered under cloud services line item.</field>
+    </record>
+
+
+    <!-- ====================================================================
+         ADDITIONAL RESOURCES
+         Covers all 5 resource_type values: dataset, equipment, software,
+         service, other. Includes unowned pool resources.
+         Constraint: UNIQUE(name, owner_project_id) — no duplicate name+project.
+         ==================================================================== -->
+
+    <!-- Unowned pool — software license -->
+    <record id="demo_resource_5" model="research.resource">
+        <field name="resource_type">software</field>
+        <field name="name">MATLAB Research License (Shared Pool)</field>
+        <field name="description">Shared university MATLAB license with Statistics, Signal Processing, and Deep Learning toolboxes.</field>
+        <field name="specification">R2024b, 12 concurrent user licenses</field>
+        <field name="availability_status">available</field>
+        <field name="notes">Pool resource — available to any project team on request.</field>
+    </record>
+
+    <!-- project_3 — dataset resource -->
+    <record id="demo_resource_6" model="research.resource">
+        <field name="resource_type">dataset</field>
+        <field name="name">Reference Human Genome GRCh38</field>
+        <field name="owner_project_id" ref="demo_project_3"/>
+        <field name="description">NCBI reference genome assembly used as alignment baseline for sequencing experiments.</field>
+        <field name="specification">GRCh38.p14, 3.1 GB compressed FASTA</field>
+        <field name="availability_status">available</field>
+    </record>
+
+    <!-- project_4 — cloud service -->
+    <record id="demo_resource_7" model="research.resource">
+        <field name="resource_type">service</field>
+        <field name="name">AWS SageMaker Ground Truth Labelling Service</field>
+        <field name="owner_project_id" ref="demo_project_4"/>
+        <field name="description">Cloud labelling service for annotating drone flight path training datasets.</field>
+        <field name="specification">Pay-per-task pricing, up to 10k tasks/day</field>
+        <field name="availability_status">available</field>
+    </record>
+
+    <!-- project_4 — equipment (drones) -->
+    <record id="demo_resource_8" model="research.resource">
+        <field name="resource_type">equipment</field>
+        <field name="name">DJI Matrice 300 RTK Drone Fleet</field>
+        <field name="owner_project_id" ref="demo_project_4"/>
+        <field name="description">Enterprise-grade quadcopters with RTK-GPS, thermal camera, and temperature-controlled payload.</field>
+        <field name="specification">5x units, 55-min flight time, 2.7kg payload, DJI FlightHub 2</field>
+        <field name="availability_status">in_use</field>
+    </record>
+
+    <!-- Unowned pool — other -->
+    <record id="demo_resource_9" model="research.resource">
+        <field name="resource_type">other</field>
+        <field name="name">Laboratory Access Keycard Pool</field>
+        <field name="description">Shared building access keycard allocation for researchers requiring 24/7 lab entry.</field>
+        <field name="specification">ISO 14443 RFID, registered with facilities management</field>
+        <field name="availability_status">available</field>
+        <field name="notes">Submit facilities request form before assignment.</field>
+    </record>
+
+    <!-- project_2 — software resource -->
+    <record id="demo_resource_10" model="research.resource">
+        <field name="resource_type">software</field>
+        <field name="name">Qiskit Quantum SDK Enterprise Deployment</field>
+        <field name="owner_project_id" ref="demo_project_2"/>
+        <field name="description">IBM Qiskit SDK with runtime primitives and noise simulation backends.</field>
+        <field name="specification">v1.2, Python 3.11, GPU-accelerated statevector simulator</field>
+        <field name="availability_status">in_use</field>
+    </record>
+
+
+    <!-- ====================================================================
+         ADDITIONAL EXPERIMENTS
+         Covers: project_4 (planned + running), project_1 (planned),
+         project_2 (cancelled).
+         Constraints enforced:
+           - UNIQUE(project_id, name)
+           - running experiments need start_date + objective
+           - completed experiments need end_date
+           - cancelled experiments have no date constraints
+         ==================================================================== -->
+
+    <!-- project_4 — planned (no start_date per planned status) -->
+    <record id="demo_experiment_4" model="research.experiment">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="name">Campus Drone Route Feasibility Trial</field>
+        <field name="objective">Assess 12 candidate UAV corridors across campus for obstacle density, wind exposure, and regulatory compliance.</field>
+        <field name="methodology">Manual route survey followed by simulated flight path analysis using DJI FlightHub simulation mode.</field>
+        <field name="status">planned</field>
+    </record>
+
+    <!-- project_4 — running (must have start_date + objective) -->
+    <record id="demo_experiment_5" model="research.experiment">
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="name">Autonomous Last-Mile Reagent Delivery Pilot</field>
+        <field name="objective">Demonstrate autonomous point-to-point reagent delivery across 3 campus buildings with less than 2% delivery failure rate.</field>
+        <field name="methodology">Deploy 3 drones on pre-approved corridors with manual safety override. Log delivery time, GPS deviation, payload integrity.</field>
+        <field name="status">running</field>
+        <field name="start_date">2026-06-01</field>
+        <field name="create_uid" ref="base.user_admin"/>
+    </record>
+
+    <!-- project_1 — planned (second experiment) -->
+    <record id="demo_experiment_6" model="research.experiment">
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="name">Reinforcement Learning Route Optimization Benchmark</field>
+        <field name="objective">Benchmark PPO and SAC reinforcement learning agents against classical OR solvers on the research supply chain routing dataset.</field>
+        <field name="methodology">Train 3 RL agents for 500k environment steps each; compare against Gurobi ILP baseline on 100 holdout scenarios.</field>
+        <field name="status">planned</field>
+        <field name="create_uid" ref="base.user_admin"/>
+    </record>
+
+    <!-- project_2 — cancelled classical baseline -->
+    <record id="demo_experiment_7" model="research.experiment">
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="name">Classical Simulated Annealing Baseline Comparison</field>
+        <field name="objective">Establish classical SA performance as a lower-bound baseline for QAOA comparison.</field>
+        <field name="methodology">Run 1000 SA iterations on 16-node graph; cancelled when QPU access confirmed sufficient for direct benchmarking.</field>
+        <field name="status">cancelled</field>
+        <field name="start_date">2026-03-15</field>
+        <field name="create_uid" ref="demo_user_bob"/>
+    </record>
+
+
+    <!-- ====================================================================
+         ADDITIONAL EXPERIMENT RESOURCE LINKS
+         Constraint: UNIQUE(experiment_id, resource_id)
+         All links below use distinct (experiment, resource) pairs.
+         ==================================================================== -->
+
+    <!-- exp_4 (project_4, planned) ↔ resource_8 (drones) -->
+    <record id="demo_experiment_resource_4" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_4"/>
+        <field name="resource_id" ref="demo_resource_8"/>
+        <field name="purpose">Drone simulation mode for route feasibility mapping</field>
+        <field name="quantity">5.0</field>
+    </record>
+
+    <!-- exp_5 (project_4, running) ↔ resource_8 (drones) — different experiment, same resource OK -->
+    <record id="demo_experiment_resource_5" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_5"/>
+        <field name="resource_id" ref="demo_resource_8"/>
+        <field name="purpose">Live autonomous delivery flights</field>
+        <field name="quantity">3.0</field>
+    </record>
+
+    <!-- exp_5 (project_4, running) ↔ resource_7 (AWS SageMaker) -->
+    <record id="demo_experiment_resource_6" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_5"/>
+        <field name="resource_id" ref="demo_resource_7"/>
+        <field name="purpose">Real-time telemetry labelling for onboard model retraining</field>
+        <field name="quantity">1.0</field>
+    </record>
+
+    <!-- exp_6 (project_1, planned) ↔ resource_1 (H100 GPU cluster) — exp_1 already uses it, exp_6 is different -->
+    <record id="demo_experiment_resource_7" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_6"/>
+        <field name="resource_id" ref="demo_resource_1"/>
+        <field name="purpose">RL agent training and environment simulation</field>
+        <field name="quantity">8.0</field>
+    </record>
+
+    <!-- exp_7 (project_2, cancelled) ↔ resource_10 (Qiskit SDK) -->
+    <record id="demo_experiment_resource_8" model="research.experiment.resource">
+        <field name="experiment_id" ref="demo_experiment_7"/>
+        <field name="resource_id" ref="demo_resource_10"/>
+        <field name="purpose">Classical baseline simulation environment (experiment cancelled)</field>
+        <field name="quantity">1.0</field>
+    </record>
+
+
+    <!-- ====================================================================
+         ADDITIONAL OUTPUTS
+         Covers: all output types (paper, dataset, software, report, thesis,
+         other) and all statuses (draft, under_review, accepted, published).
+         Constraint: UNIQUE(name, experiment_id) — names must be unique per exp.
+         ==================================================================== -->
+
+    <!-- exp_4 (planned) → report output -->
+    <record id="demo_output_4" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_4"/>
+        <field name="output_type">report</field>
+        <field name="name">Campus UAV Corridor Feasibility Assessment Report</field>
+        <field name="description">Technical report evaluating 12 candidate drone delivery corridors across the university campus.</field>
+        <field name="status">draft</field>
+    </record>
+
+    <!-- exp_5 (running) → software output -->
+    <record id="demo_output_5" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_5"/>
+        <field name="output_type">software</field>
+        <field name="name">AutonomousDelivery Control System v1.0</field>
+        <field name="description">Open-source ROS2-based autonomous delivery management stack for research supply chain logistics.</field>
+        <field name="status">under_review</field>
+    </record>
+
+    <!-- exp_6 (planned) → thesis output -->
+    <record id="demo_output_6" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_6"/>
+        <field name="output_type">thesis</field>
+        <field name="name">MSc Thesis: Adaptive Graph Routing in Research Supply Chain Networks</field>
+        <field name="description">Master's thesis exploring reinforcement learning-driven adaptive routing for multi-institutional research supply chains.</field>
+        <field name="status">draft</field>
+    </record>
+
+    <!-- exp_2 (running) → second output: dataset (exp_2 already has demo_output_2) -->
+    <record id="demo_output_7" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_2"/>
+        <field name="output_type">dataset</field>
+        <field name="name">VQE Circuit Parameter Landscape Benchmark Dataset</field>
+        <field name="description">Tabulated VQE convergence results across 500 random circuit initializations on 16-node supply chain graphs.</field>
+        <field name="status">accepted</field>
+    </record>
+
+    <!-- exp_3 (completed) → second output: other (exp_3 already has demo_output_3) -->
+    <record id="demo_output_8" model="research.output">
+        <field name="experiment_id" ref="demo_experiment_3"/>
+        <field name="output_type">other</field>
+        <field name="name">BWA-MEM2 vs Clara Genomics Performance Comparison Supplementary Material</field>
+        <field name="description">Supplementary benchmark tables and raw profiling data comparing BWA-MEM2 and Clara Genomics on NVMe-backed sequencing pipeline.</field>
+        <field name="status">published</field>
+    </record>
+
+
+    <!-- ====================================================================
+         ADDITIONAL RESEARCH PAPERS
+         Covers statuses: draft (paper_4), submitted (paper_5), archived (paper_6).
+         Combined with existing: draft (paper_1), submitted (paper_2),
+         published (paper_3) — all 4 paper statuses now covered.
+         Constraints:
+           - published papers need DOI + publication_date (paper_3 is published ✓)
+           - archived/submitted/draft have no DOI constraint
+           - write() blocks editing paper_name/doi/date on published papers
+             (create is fine, no write needed)
+         ==================================================================== -->
+
+    <!-- project_4 draft paper linked to drone feasibility report output -->
+    <record id="demo_paper_4" model="research.paper">
+        <field name="paper_name">Autonomous Micro-Drone Delivery Networks for Research Supply Chains</field>
+        <field name="paper_author">Dr. Admin User, Dr. Bob Martinez</field>
+        <field name="project_id" ref="demo_project_4"/>
+        <field name="output_id" ref="demo_output_4"/>
+        <field name="paper_status">draft</field>
+        <field name="paper_abstract">We present a proof-of-concept autonomous drone delivery network for intra-campus reagent logistics, demonstrating 94% on-time delivery rate under real-world wind conditions across a university research campus.</field>
+        <field name="paper_github_url">https://github.com/example/autonomous-lab-drone</field>
+    </record>
+
+    <!-- project_1 submitted paper linked to thesis output -->
+    <record id="demo_paper_5" model="research.paper">
+        <field name="paper_name">Graph-Neural-Network-Optimised Multi-Echelon Research Resource Allocation</field>
+        <field name="paper_author">Dr. Admin User, Dr. Carol Danvers, Dr. Alice Vance</field>
+        <field name="project_id" ref="demo_project_1"/>
+        <field name="output_id" ref="demo_output_6"/>
+        <field name="paper_status">submitted</field>
+        <field name="paper_abstract">This work proposes a hierarchical GNN-based resource allocator for multi-echelon research supply chains. Evaluated on 4 real-world project networks, our model achieves 18% reduction in resource idle time over classical LP solvers.</field>
+        <field name="paper_github_url">https://github.com/example/gnn-resource-allocation</field>
+    </record>
+
+    <!-- project_2 archived paper (no DOI required for archived) -->
+    <record id="demo_paper_6" model="research.paper">
+        <field name="paper_name">Variational Quantum Annealing for Early Supply Chain Flow Problems: Preliminary Results</field>
+        <field name="paper_author">Dr. Bob Martinez</field>
+        <field name="project_id" ref="demo_project_2"/>
+        <field name="output_id" ref="demo_output_7"/>
+        <field name="paper_status">archived</field>
+        <field name="paper_abstract">Early preliminary results using variational quantum annealing on small-scale supply chain flow problems. Superseded by updated QAOA approach; archived for reference.</field>
+    </record>
 
 </odoo>
-
